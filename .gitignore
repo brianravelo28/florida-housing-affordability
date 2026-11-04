@@ -21,3 +21,6 @@ Thumbs.db
 
 # Local-only notes (never pushed)
 notes/
+
+# Local assistant settings
+.claude/
