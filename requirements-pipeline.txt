@@ -1,0 +1,6 @@
+-r requirements.txt
+# only needed to rebuild the data (fetching the Census API, simplifying boundary files)
+requests>=2.34.2,<3
+geopandas>=1.2.0,<2
+pyogrio>=0.13.0,<1
+shapely>=2.2.0,<3
