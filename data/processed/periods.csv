@@ -1,4 +1,4 @@
-period,api_year,dollar_year,factor_to_2024_dollars,home_value_adjusted_by_census
-2010-2014,2014,2024,1.330351697,False
-2015-2019,2019,2024,1.23070782,False
-2020-2024,2024,2024,1,True
+period,api_year,dollar_year,factor_to_2024_dollars,home_value_adjusted_by_census,home_value_factor_to_2024_dollars
+2010-2014,2014,2024,1.330351697,False,1.373080378
+2015-2019,2019,2024,1.23070782,False,1.276291635
+2020-2024,2024,2024,1,True,1
