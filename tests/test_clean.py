@@ -97,6 +97,47 @@ def test_dollars_convert_estimate_and_margin_and_leave_cv_alone(make_raw, cleane
     assert out['income_cv'].iloc[0] == pytest.approx(5000 / 1.645 / 50000 * 100)
 
 
+def test_cpi_u_averages_reproduce_the_factors_census_publishes():
+    cpi = cfg.CPI_U_ANNUAL_AVERAGE
+    assert cpi[2024] / cpi[2019] == pytest.approx(1.23070782, rel=0.005)
+    assert cpi[2019] / cpi[2014] == pytest.approx(1.08096469, rel=0.005)
+
+
+def test_unadjusted_home_values_use_the_average_year_factor():
+    cpi = cfg.CPI_U_ANNUAL_AVERAGE
+    expected_2014 = cpi[2024] / ((cpi[2010] + cpi[2011] + cpi[2012] + cpi[2013] + cpi[2014]) / 5)
+    expected_2019 = cpi[2024] / ((cpi[2015] + cpi[2016] + cpi[2017] + cpi[2018] + cpi[2019]) / 5)
+    assert cfg.home_value_factor(2014) == pytest.approx(expected_2014)
+    assert cfg.home_value_factor(2019) == pytest.approx(expected_2019)
+    assert cfg.home_value_factor(2014) == pytest.approx(1.3731, abs=1e-4)
+    # larger than the final-year factor: the values were reported earlier in the window
+    assert cfg.home_value_factor(2014) > cfg.DOLLAR_FACTORS_TO_2024[2014]
+    assert cfg.home_value_factor(2019) > cfg.DOLLAR_FACTORS_TO_2024[2019]
+
+
+def test_census_adjusted_home_values_keep_the_published_factor():
+    assert cfg.home_value_factor(2024) == 1.0
+
+
+def test_home_value_and_income_use_different_factors_in_an_unadjusted_release(make_raw, cleaned):
+    out = cleaned(make_raw({'B25077_001E': 156200, 'B25077_001M': 1000, 'B19013_001E': 47212, 'B19013_001M': 500}),
+                  api_year=2014)
+    assert out['home_value'].iloc[0] == pytest.approx(156200 * cfg.home_value_factor(2014))
+    assert out['home_value_moe'].iloc[0] == pytest.approx(1000 * cfg.home_value_factor(2014))
+    assert out['income'].iloc[0] == pytest.approx(47212 * cfg.DOLLAR_FACTORS_TO_2024[2014])  # Census adjusted income
+    assert out['home_value_as_published'].iloc[0] == 156200
+
+
+def test_rent_keeps_the_published_factor_in_an_unadjusted_release(make_raw, cleaned):
+    out = cleaned(make_raw({'B25064_001E': 1000}), api_year=2019)
+    assert out['rent'].iloc[0] == pytest.approx(1000 * 1.23070782)
+
+
+def test_unadjusted_home_value_matches_the_measured_florida_figure():
+    # Florida 2010-2014 published median $156,200 -> about $214,500 in 2024 dollars (measured two independent ways)
+    assert 156200 * cfg.home_value_factor(2014) == pytest.approx(214_450, abs=100)
+
+
 def test_latest_release_dollars_are_unchanged(make_raw, cleaned):
     out = cleaned(make_raw({'B25064_001E': 1700}), api_year=2024)
     assert out['rent'].iloc[0] == 1700
@@ -106,6 +147,8 @@ def test_period_table_states_which_home_values_census_adjusted():
     table = clean.period_table().set_index('period')
     assert table['home_value_adjusted_by_census'].to_dict() == {'2010-2014': False, '2015-2019': False, '2020-2024': True}
     assert table.loc['2015-2019', 'factor_to_2024_dollars'] == pytest.approx(1.23070782)
+    assert table.loc['2015-2019', 'home_value_factor_to_2024_dollars'] == pytest.approx(cfg.home_value_factor(2019))
+    assert table.loc['2020-2024', 'home_value_factor_to_2024_dollars'] == 1.0
 
 
 # ---- derived measures ----------------------------------------------------------------------------------
@@ -117,9 +160,12 @@ def test_value_to_income_ratio(make_raw, cleaned):
     assert pd.isna(out['value_to_income'].iloc[1])
 
 
-def test_value_to_income_is_unaffected_by_the_dollar_conversion(make_raw, cleaned):
+def test_value_to_income_compares_values_in_the_same_2024_dollars(make_raw, cleaned):
     raw = make_raw({'B25077_001E': 300000, 'B19013_001E': 60000})
-    assert cleaned(raw, api_year=2014)['value_to_income'].iloc[0] == pytest.approx(5.0)
+    ratio = cleaned(raw, api_year=2014)['value_to_income'].iloc[0]
+    expected = (300000 * cfg.home_value_factor(2014)) / (60000 * cfg.DOLLAR_FACTORS_TO_2024[2014])
+    assert ratio == pytest.approx(expected)
+    assert ratio > 5.0  # the early home value is converted with a larger factor than income, so the ratio is above the raw 5.0
 
 
 def test_proportion_moe_matches_a_hand_calculation():

@@ -7,7 +7,9 @@ Rules (each one is counted; the counts are written to data/processed/cleaning_lo
      flagged and left out of medians and map colors; the cap is kept in its own column.
   3. Reliability: CV = (margin of error / 1.645) / estimate, banded high (<12%), moderate (12-40%),
      low (>40%) using the Census Bureau's ACS handbook convention.
-  4. Dollar figures are converted to 2024 dollars with the factors the Census Bureau publishes.
+  4. Dollar figures are converted to 2024 dollars. Income and rent use the factors the Census Bureau publishes
+     (it adjusts them to each period's final year). Home values from the 2010-2014 and 2015-2019 releases, which
+     Census did not adjust, use the average-year CPI-U factor (see acs_config.home_value_factor).
   5. Derived measures: value-to-income ratio (a ratio of two medians, descriptive, no margin of error) and the share
      of renter households paying 30% or more of income on rent, with a margin of error from the Census
      formulas for proportions.
@@ -49,9 +51,9 @@ def special(series):
     return series < cfg.SPECIAL_VALUE_CEILING
 
 
-def dollars_to_2024(series, api_year):
-    """Convert dollars as published in the given release to 2024 dollars (Census-published factors)"""
-    return series * cfg.DOLLAR_FACTORS_TO_2024[api_year]
+def dollars_to_2024(series, api_year, factor=None):
+    """Convert dollars as published in the given release to 2024 dollars (Census-published factors by default)"""
+    return series * (cfg.DOLLAR_FACTORS_TO_2024[api_year] if factor is None else factor)
 
 
 def cv_percent(estimate, moe):
@@ -81,9 +83,10 @@ def clean_median(df, name, base, api_year, log):
     out = pd.DataFrame(index=df.index)
     published = est.where(ok)
     margin = moe.where(ok & ~moe_missing)
+    factor = cfg.home_value_factor(api_year) if name == 'home_value' else None
     out[name + '_as_published'] = published
-    out[name] = dollars_to_2024(published, api_year)
-    out[name + '_moe'] = dollars_to_2024(margin, api_year)
+    out[name] = dollars_to_2024(published, api_year, factor)
+    out[name + '_moe'] = dollars_to_2024(margin, api_year, factor)
     out[name + '_top_code_published'] = est.where(top_coded)
     cv = cv_percent(published, margin)
     out[name + '_cv'] = cv
@@ -209,6 +212,7 @@ def period_table():
         'period': period, 'api_year': year, 'dollar_year': cfg.DOLLAR_YEAR,
         'factor_to_2024_dollars': cfg.DOLLAR_FACTORS_TO_2024[year],
         'home_value_adjusted_by_census': year not in cfg.HOME_VALUE_UNADJUSTED_API_YEARS,
+        'home_value_factor_to_2024_dollars': cfg.home_value_factor(year),
     } for period, year in cfg.RELEASES.items()])
 
 

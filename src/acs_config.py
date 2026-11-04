@@ -36,6 +36,28 @@ DOLLAR_FACTORS_TO_2024 = {
 # 2018-2022 release). Income and rent are adjusted in every release.
 HOME_VALUE_UNADJUSTED_API_YEARS = (2014, 2019)
 
+# Those home values are the raw medians of values reported across the five survey years, so converting them
+# with the final-year factor would treat them as final-year dollars and understate them by about 3-4%. Instead
+# they are converted with the factor for the average year of the period: 2024 CPI-U / mean CPI-U of the period's
+# five years. CPI-U annual averages (U.S. city average, all items, 1982-84=100) from the Bureau of Labor
+# Statistics API, series CUUR0000SA0, retrieved 2026-11-04. They reproduce the factors Census publishes
+# (R-CPI-U-RS) within 0.3%.
+CPI_U_ANNUAL_AVERAGE = {
+    2010: 218.056, 2011: 224.939, 2012: 229.594, 2013: 232.957, 2014: 236.736,
+    2015: 237.017, 2016: 240.007, 2017: 245.120, 2018: 251.107, 2019: 255.657,
+    2020: 258.811, 2021: 270.970, 2022: 292.655, 2023: 304.702, 2024: 313.689,
+}
+
+
+def home_value_factor(api_year):
+    """Factor converting a release's published median home value to 2024 dollars"""
+    if api_year not in HOME_VALUE_UNADJUSTED_API_YEARS:
+        return DOLLAR_FACTORS_TO_2024[api_year]  # Census already adjusted it to the final year
+    period_years = range(api_year - 4, api_year + 1)
+    average = sum(CPI_U_ANNUAL_AVERAGE[y] for y in period_years) / 5
+    return CPI_U_ANNUAL_AVERAGE[DOLLAR_YEAR] / average
+
+
 # ---- Tables ----------------------------------------------------------------------------------------
 # Medians: each has an estimate (E) and a margin of error (M, 90% confidence).
 MEDIANS = {
