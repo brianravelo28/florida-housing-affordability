@@ -1,0 +1,380 @@
+{
+  "2010-2014 state": {
+    "rows": 1,
+    "home_value": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "rent": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "housing_units": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "owner_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renter_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renters_30plus_share": {
+      "no_estimate": 0,
+      "share_is_zero": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "value_to_income": {
+      "computed": 1,
+      "not_computed": 0
+    }
+  },
+  "2010-2014 counties": {
+    "rows": 67,
+    "home_value": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 65,
+      "band_moderate": 2,
+      "band_low": 0
+    },
+    "rent": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 65,
+      "band_moderate": 2,
+      "band_low": 0
+    },
+    "income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 67,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "housing_units": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "owner_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renter_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renters_30plus_share": {
+      "no_estimate": 0,
+      "share_is_zero": 0,
+      "band_high": 59,
+      "band_moderate": 7,
+      "band_low": 1
+    },
+    "value_to_income": {
+      "computed": 67,
+      "not_computed": 0
+    }
+  },
+  "2015-2019 state": {
+    "rows": 1,
+    "home_value": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "rent": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "housing_units": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "owner_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renter_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renters_30plus_share": {
+      "no_estimate": 0,
+      "share_is_zero": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "value_to_income": {
+      "computed": 1,
+      "not_computed": 0
+    }
+  },
+  "2015-2019 counties": {
+    "rows": 67,
+    "home_value": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 65,
+      "band_moderate": 2,
+      "band_low": 0
+    },
+    "rent": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 66,
+      "band_moderate": 1,
+      "band_low": 0
+    },
+    "income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 67,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "housing_units": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "owner_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renter_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renters_30plus_share": {
+      "no_estimate": 0,
+      "share_is_zero": 0,
+      "band_high": 59,
+      "band_moderate": 8,
+      "band_low": 0
+    },
+    "value_to_income": {
+      "computed": 67,
+      "not_computed": 0
+    }
+  },
+  "2020-2024 state": {
+    "rows": 1,
+    "home_value": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "rent": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "housing_units": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "owner_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renter_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renters_30plus_share": {
+      "no_estimate": 0,
+      "share_is_zero": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "value_to_income": {
+      "computed": 1,
+      "not_computed": 0
+    }
+  },
+  "2020-2024 counties": {
+    "rows": 67,
+    "home_value": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 66,
+      "band_moderate": 1,
+      "band_low": 0
+    },
+    "rent": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 63,
+      "band_moderate": 4,
+      "band_low": 0
+    },
+    "income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 66,
+      "band_moderate": 1,
+      "band_low": 0
+    },
+    "housing_units": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "owner_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renter_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renters_30plus_share": {
+      "no_estimate": 0,
+      "share_is_zero": 0,
+      "band_high": 51,
+      "band_moderate": 16,
+      "band_low": 0
+    },
+    "value_to_income": {
+      "computed": 67,
+      "not_computed": 0
+    }
+  },
+  "2020-2024 tracts": {
+    "rows": 5160,
+    "home_value": {
+      "no_estimate": 190,
+      "top_coded": 22,
+      "estimate_without_margin": 0,
+      "band_high": 3690,
+      "band_moderate": 1162,
+      "band_low": 96
+    },
+    "rent": {
+      "no_estimate": 397,
+      "top_coded": 93,
+      "estimate_without_margin": 0,
+      "band_high": 3259,
+      "band_moderate": 1262,
+      "band_low": 149
+    },
+    "income": {
+      "no_estimate": 110,
+      "top_coded": 9,
+      "estimate_without_margin": 0,
+      "band_high": 2051,
+      "band_moderate": 2911,
+      "band_low": 79
+    },
+    "housing_units": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "owner_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renter_households": {
+      "special_estimates": 0,
+      "special_margins": 0
+    },
+    "renters_30plus_share": {
+      "no_estimate": 114,
+      "share_is_zero": 89,
+      "band_high": 319,
+      "band_moderate": 3500,
+      "band_low": 1138
+    },
+    "value_to_income": {
+      "computed": 4933,
+      "not_computed": 227
+    }
+  }
+}
