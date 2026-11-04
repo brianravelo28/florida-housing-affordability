@@ -30,8 +30,6 @@ PROCESSED = cfg.PROCESSED_DIR
 GRAY = '#b0b0b0'
 CHART_HINT = "💡 Drag to zoom • Double-click to reset"
 MAP_HINT = "💡 Scroll to zoom • Drag to pan • Hover or tap an area for its figure and margin of error"
-CENSUS_NOTICE = ("This product uses the Census Bureau Data API but is not endorsed or certified by the "
-                 "Census Bureau.")
 
 
 # ============================================================================
@@ -255,4 +253,4 @@ with tab_about:
     st.markdown("[Code and methodology on GitHub](https://github.com/brianravelo28/florida-housing-affordability)")
 
 st.markdown("---")
-st.caption(CENSUS_NOTICE)
+st.caption(view.CENSUS_NOTICE)

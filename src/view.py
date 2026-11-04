@@ -12,6 +12,10 @@ import math
 import numpy as np
 import pandas as pd
 
+# The Census Bureau's Terms of Service require this notice wherever the API data is displayed
+CENSUS_NOTICE = ("This product uses the Census Bureau Data API but is not endorsed or certified by the "
+                 "Census Bureau.")
+
 # Bands whose areas are drawn gray instead of shaded
 GRAY_BANDS = frozenset({'low', 'no_estimate', 'top_coded', 'no_margin'})
 
