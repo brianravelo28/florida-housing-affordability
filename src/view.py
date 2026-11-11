@@ -8,6 +8,9 @@ An area is grayed out (not shaded) when its estimate is missing, top-coded, or l
 
 import json
 import math
+import os
+import platform
+from importlib import metadata
 
 import numpy as np
 import pandas as pd
@@ -22,15 +25,18 @@ GRAY_BANDS = frozenset({'low', 'no_estimate', 'top_coded', 'no_margin'})
 # Metric label -> how to read its columns. kind: dollars | share | ratio
 METRICS = {
     'Median home value': {'col': 'home_value', 'kind': 'dollars', 'scale': 'YlOrRd', 'unit': '2024 dollars',
-                          'short': 'Median home value'},
+                          'short': 'Median home value', 'count': ('owner_households', 'owner households')},
     'Median gross rent (monthly)': {'col': 'rent', 'kind': 'dollars', 'scale': 'YlOrRd', 'unit': '2024 dollars',
-                                    'short': 'Median gross rent'},
+                                    'short': 'Median gross rent', 'count': ('renter_households', 'renter households')},
     'Median household income': {'col': 'income', 'kind': 'dollars', 'scale': 'YlGnBu', 'unit': '2024 dollars',
-                                'short': 'Median household income'},
+                                'short': 'Median household income', 'count': ('households', 'households')},
     'Home value to owner income ratio': {'col': 'value_to_owner_income', 'kind': 'ratio', 'scale': 'YlOrRd',
-                                         'unit': 'times owner income', 'short': 'Home value / owner income'},
+                                         'unit': 'times owner income', 'short': 'Home value / owner income',
+                                         'count': ('owner_households', 'owner households')},
     'Renters paying 30% or more of income on rent': {'col': 'renters_30plus_share', 'kind': 'share', 'scale': 'YlOrRd',
-                                                      'unit': '% of renter households', 'short': 'Renters paying 30%+'},
+                                                      'unit': '% of renter households', 'short': 'Renters paying 30%+',
+                                                      'count': ('rent_computed_households',
+                                                                'renter households with rent computed')},
 }
 
 BAND_TEXT = {
@@ -88,6 +94,36 @@ def _top_code_text(df, col, kind):
                       if pd.notna(v) and d in word else '' for v, d in zip(cap, direction)], index=df.index)
 
 
+def count_text(n, label):
+    """Hover line saying how many households the estimate covers (the Census Bureau's estimate of them, not a sample size)"""
+    if pd.isna(n):
+        return ''
+    n = int(round(n))
+    note = ' (fewer than 30: read with care)' if n < 30 else ''
+    return f"<br>Based on about {n:,} {label}{note}"
+
+
+def deployment_info(environ=None, proc_status='/proc/self/status'):
+    """What is running: commit (on Render), Python and library versions, and this process's memory where the OS reports it"""
+    environ = os.environ if environ is None else environ
+    memory = None
+    try:
+        with open(proc_status, encoding='utf-8') as f:
+            for line in f:
+                if line.startswith('VmRSS:'):
+                    memory = round(int(line.split()[1]) / 1024, 1)   # kB -> MB
+    except OSError:
+        pass
+    libraries = {}
+    for name in ('pandas', 'numpy', 'plotly', 'streamlit'):
+        try:
+            libraries[name] = metadata.version(name)
+        except metadata.PackageNotFoundError:
+            libraries[name] = None
+    return {'commit': (environ.get('RENDER_GIT_COMMIT') or '')[:7] or None, 'python': platform.python_version(),
+            'libraries': libraries, 'memory_mb': memory}
+
+
 def map_frame(df, metric):
     """
     One row per area: geoid, name, value, margin, cv, band, gray (bool), hover text.
@@ -97,6 +133,8 @@ def map_frame(df, metric):
     spec = METRICS[metric]
     col, kind = spec['col'], spec['kind']
     out = pd.DataFrame({'geoid': df['geoid'].values, 'name': df['name'].map(short_name).values}, index=df.index)
+    count_col, count_label = spec['count']
+    out['households'] = df[count_col].values if count_col in df.columns else np.nan
 
     if kind == 'ratio':
         parts = {'home value': 'home_value', 'owner income': 'owner_income'}
@@ -113,7 +151,8 @@ def map_frame(df, metric):
             if gray[i]:
                 why = '; '.join(f"{label}: {band_text(bands[label][i])}" for label in parts
                                 if bands[label][i] in GRAY_BANDS)
-                hover.append(f"<b>{out.at[i, 'name']}</b><br>Not shaded. {why}")
+                hover.append(f"<b>{out.at[i, 'name']}</b><br>Not shaded. {why}"
+                             f"{count_text(out.at[i, 'households'], count_label)}")
             else:
                 hover.append(
                     f"<b>{out.at[i, 'name']}</b><br>{spec['short']}: {fmt_value(kind, out.at[i, 'value'])}"
@@ -121,6 +160,7 @@ def map_frame(df, metric):
                     f"{band_text(bands['home value'][i], df.at[i, 'home_value_cv'])}"
                     f"<br>Median owner-household income {fmt_value('dollars', df.at[i, 'owner_income'])}: "
                     f"{band_text(bands['owner income'][i], df.at[i, 'owner_income_cv'])}"
+                    f"{count_text(out.at[i, 'households'], count_label)}"
                     "<br><i>A ratio of two medians; it has no margin of error of its own.</i>")
         out['gray'] = gray
         out['hover'] = hover
@@ -137,12 +177,13 @@ def map_frame(df, metric):
     for i in df.index:
         name = out.at[i, 'name']
         if gray[i]:
-            hover.append(f"<b>{name}</b><br>Not shaded. {band_text(band[i], out.at[i, 'cv'])}.{cap_text[i]}")
+            hover.append(f"<b>{name}</b><br>Not shaded. {band_text(band[i], out.at[i, 'cv'])}.{cap_text[i]}"
+                         f"{count_text(out.at[i, 'households'], count_label)}")
         else:
             moe = out.at[i, 'moe']
             moe_text = f" &plusmn; {fmt_margin(kind, moe)}" if pd.notna(moe) else ''
             hover.append(f"<b>{name}</b><br>{spec['short']}: {fmt_value(kind, out.at[i, 'value'])}{moe_text}"
-                         f"<br>{band_text(band[i], out.at[i, 'cv'])}")
+                         f"<br>{band_text(band[i], out.at[i, 'cv'])}{count_text(out.at[i, 'households'], count_label)}")
     out['gray'] = gray
     out['hover'] = hover
     return out

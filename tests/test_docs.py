@@ -96,6 +96,49 @@ def test_methodology_names_the_check_scripts_and_the_cross_check_result():
         assert name in doc, name
 
 
+def test_methodology_tract_exclusions_match_what_the_map_shows():
+    import pandas as pd
+    doc = re.sub(r'\s+', ' ', read('docs', 'METHODOLOGY.md'))
+    tracts = pd.read_csv(os.path.join(cfg.PROCESSED_DIR, f'tracts_{cfg.LATEST_PERIOD}.csv'), dtype={'geoid': str})
+    shapes = json.load(open(os.path.join(cfg.PROCESSED_DIR, 'florida_tracts.geojson'), encoding='utf-8'))
+    mapped = tracts[tracts['geoid'].isin({f['properties']['geoid'] for f in shapes['features']})]
+    assert f"| Census tracts in Florida (2020 boundaries), 2020-2024 release | {len(tracts):,} |" in doc
+    assert f"| Tracts on the map | {len(mapped):,} |" in doc and f"| {len(tracts) - len(mapped)} |" in doc
+    labels = {'Median home value': 'Median home value', 'Median gross rent (monthly)': 'Median gross rent',
+              'Median household income': 'Median household income', 'Renters paying 30% or more of income on rent': 'Renters paying 30%+ of income'}
+    for metric, label in labels.items():
+        frame = view.map_frame(mapped, metric)
+        bands = frame.loc[frame['gray'], 'band'].value_counts()
+        row = (f"| {label} | {len(frame):,} | {int((~frame['gray']).sum()):,} | {int(bands.get('no_estimate', 0)):,} | "
+               f"{int(bands.get('top_coded', 0)):,} | {int(bands.get('low', 0)):,} |")
+        assert row in doc, row
+    ratio = view.map_frame(mapped, 'Home value to owner income ratio')
+    assert f"| Home value to owner income ratio | {len(ratio):,} | {int((~ratio['gray']).sum()):,} | {int(ratio['gray'].sum()):,} (" in doc
+
+
+def test_methodology_checksums_and_pull_date_match_the_manifest():
+    doc = read('docs', 'METHODOLOGY.md')
+    manifest = json.load(open(cfg.MANIFEST_PATH, encoding='utf-8'))
+    for entry in manifest:
+        assert f"`{entry['sha256'][:16]}`" in doc and entry['raw_file'] in doc
+    assert f"pulled {manifest[0]['retrieved_at_utc'][:10]} (UTC)" in doc
+    assert manifest[0]['retrieved_at_utc'][:10] in read('docs', 'CITATIONS.md')
+
+
+def test_the_host_health_check_is_streamlits_real_endpoint_and_documented():
+    assert 'healthCheckPath: /_stcore/health' in read('render.yaml')
+    assert '/_stcore/health' in read('docs', 'METHODOLOGY.md') and '/_stcore/health' in read('docs', 'DEPLOYMENT.md')
+
+
+def test_methodology_has_the_standard_sections():
+    doc = read('docs', 'METHODOLOGY.md')
+    for heading in ('## Terms', '## Data sources', '## Cleaning rules', '## Reproducibility', '## Deployment notes'):
+        assert heading in doc, heading
+    contents = doc.split('Contents:')[1].split('\n')[0]
+    for anchor in ('#terms', '#data-sources', '#reproducibility', '#deployment-notes'):
+        assert anchor in contents, anchor
+
+
 def test_the_census_notice_is_on_every_surface_that_needs_it():
     notice = 'This product uses the Census Bureau Data API but is not endorsed or certified by the Census Bureau.'
     assert view.CENSUS_NOTICE == notice

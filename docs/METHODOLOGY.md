@@ -3,7 +3,7 @@
 How the data was pulled, cleaned and scored, and what the numbers can and cannot say. Every count below comes from
 `data/processed/cleaning_log.json`, which `python run_pipeline.py` writes; a test checks that this page matches it.
 
-Contents: [Terms](#terms) · [Source and periods](#source-and-periods) · [What is pulled](#what-is-pulled) · [Cleaning rules](#cleaning-rules) · [Reliability](#reliability) · [Dollars](#dollars) · [Derived measures](#derived-measures) · [Boundaries](#boundaries) · [Checks](#checks) · [Limits](#limits)
+Contents: [Terms](#terms) · [Data sources](#data-sources) · [Source and periods](#source-and-periods) · [What is pulled](#what-is-pulled) · [Cleaning rules](#cleaning-rules) · [From tracts in the data to tracts on the map](#from-tracts-in-the-data-to-tracts-on-the-map) · [Reliability](#reliability) · [Dollars](#dollars) · [Derived measures](#derived-measures) · [Boundaries](#boundaries) · [Checks](#checks) · [Limits](#limits) · [Reproducibility](#reproducibility) · [Deployment notes](#deployment-notes)
 
 ## Terms
 
@@ -25,6 +25,19 @@ Contents: [Terms](#terms) · [Source and periods](#source-and-periods) · [What 
 | Open-ended value | A median in the lowest or highest interval of the Census Bureau's range, so only the limit is reported (for example "250,000+" for income and "2,000,000+" for home value; the lowest income interval is "2,500-"). Also called top-coded or bottom-coded. |
 | 2024 dollars | Dollar figures adjusted for inflation to 2024 (see [Dollars](#dollars)). |
 | Census tract | A neighborhood-sized area drawn by the Census Bureau; Florida has 5,160 in the 2020 boundaries. |
+
+## Data sources
+
+| Source | What | Version used |
+|--------|------|--------------|
+| Census Bureau Data API, ACS 5-year detailed tables B25077, B25064, B19013, B25119, B25070, B25001, B25003 | Florida, its 67 counties (three periods) and its 5,160 census tracts (2020-2024) | Releases 2014, 2019 and 2024; pulled 2026-11-11 (UTC); the raw responses are committed in `data/raw/` with SHA-256 checksums in `data/manifest.json` |
+| Census Bureau ACS 1-year table B25077 | Florida median home value, 2010-2019, for the home value conversion check | Pulled 2026-11-11 (UTC), stored in `data/home_value_1year_medians.csv` |
+| Census Bureau Data Profile tables DP03 and DP04 | Cross-check of three counties | 2019 and 2024 releases; result in `data/processed/profile_crosscheck.csv` |
+| Census Bureau cartographic boundary files, 2024, 1:500,000 | County and tract shapes | `cb_2024_us_county_500k` and `cb_2024_12_tract_500k`, downloaded by the pipeline |
+| Census Bureau comparison factors (R-CPI-U-RS) | Converting income and rent to 2024 dollars | 1.08096469 (2014 to 2019 dollars) and 1.23070782 (2019 to 2024 dollars) |
+| Bureau of Labor Statistics CPI-U, series CUUR0000SA0 | Annual averages 2010-2024, for the home value conversion | BLS API, retrieved 2026-11-04; stored in `src/acs_config.py` |
+
+If the Census Bureau corrects a release, a fresh pull would differ from the committed responses; the checksums show which version the numbers come from.
 
 ## Source and periods
 
@@ -97,6 +110,26 @@ Counties: every county has an estimate in every period. Reliability ratings (hig
 | 2010-2014 | 65 / 2 / 0 | 65 / 2 / 0 | 67 / 0 / 0 | 65 / 2 / 0 | 59 / 7 / 1 |
 | 2015-2019 | 65 / 2 / 0 | 66 / 1 / 0 | 67 / 0 / 0 | 67 / 0 / 0 | 59 / 8 / 0 |
 | 2020-2024 | 66 / 1 / 0 | 63 / 4 / 0 | 66 / 1 / 0 | 67 / 0 / 0 | 51 / 16 / 0 |
+
+## From tracts in the data to tracts on the map
+
+| Step | Tracts |
+|------|--------|
+| Census tracts in Florida (2020 boundaries), 2020-2024 release | 5,160 |
+| Removed: offshore water areas with no boundary shape, no housing units and no estimates | 38 |
+| Tracts on the map | 5,122 |
+
+Of the 5,122 tracts on the map, by measure:
+
+| Measure | On the map | Shaded | Gray: no estimate | Gray: open-ended | Gray: low reliability |
+|---------|-----------|--------|-------------------|------------------|-----------------------|
+| Median home value | 5,122 | 4,852 | 152 | 22 | 96 |
+| Median gross rent | 5,122 | 4,521 | 359 | 93 | 149 |
+| Median household income | 5,122 | 4,962 | 72 | 9 | 79 |
+| Home value to owner income ratio | 5,122 | 4,532 | 590 (either median missing, open-ended or low reliability) | | |
+| Renters paying 30%+ of income | 5,122 | 3,908 | 76 | 0 | 1,138 |
+
+Gray areas stay on the map and are drawn gray; they are counted here, and the count under each map matches this table.
 
 ## Reliability
 
@@ -204,3 +237,42 @@ no housing units and no estimates, and the pipeline fails if a tract with housin
 - The Census Bureau reports only a limit for medians in the open-ended intervals (for example the highest-valued tracts), so those are gray.
 - Differences between areas or periods are called real only when they exceed the combined margin of error.
 - Patterns show where and when costs differ; they do not show why.
+
+## Reproducibility
+
+**Run order.** `python run_pipeline.py` (fetch, clean, boundaries; needs the `CENSUS_API_KEY` environment variable), then
+`python src/findings.py`, `python src/home_value_conversion_check.py` and `python src/crosscheck_profile.py`.
+
+**Determinism.** Cleaning and the findings use no randomness. The same raw responses give identical tables: a test rebuilds the
+processed tables from the committed raw responses and requires them to equal the committed files, a second test runs the cleaning
+twice and requires identical output, and a third shows that a changed input changes the output.
+
+**Data version.** The raw API responses are committed; SHA-256 of each (first 16 characters shown; the full values are in
+`data/manifest.json`, and a test checks every file against it):
+
+| Pull | File | Rows | SHA-256 |
+|------|------|------|---------|
+| 2010-2014 state | `data/raw/state_2014.json` | 1 | `e54cf2b99ddfbefd` |
+| 2010-2014 county | `data/raw/county_2014.json` | 67 | `d6f31c8afdcfedeb` |
+| 2015-2019 state | `data/raw/state_2019.json` | 1 | `e71d6f11dcfeace9` |
+| 2015-2019 county | `data/raw/county_2019.json` | 67 | `5573e2c86d4e78c7` |
+| 2020-2024 state | `data/raw/state_2024.json` | 1 | `bafa6afb485e0100` |
+| 2020-2024 county | `data/raw/county_2024.json` | 67 | `04ab7eb99b0f470d` |
+| 2020-2024 tract | `data/raw/tract_2024.json` | 5,160 | `cb9b5b52eec8ada1` |
+
+**Software.** The committed data was built with Python 3.14.7, pandas 3.1.0, NumPy 2.5.4, GeoPandas 1.2.0, pyogrio 0.13.0 and Shapely
+2.2.0 (Plotly 7.1.0, Streamlit 1.66.1, requests 2.34.2 and pytest 9.2.0 for the app and the tests). The requirements files give each
+package a minimum version and a cap at the next major version; `.python-version` sets Python 3.14.3 for the host.
+
+**Tests.** `python -m pytest` runs offline with small hand-built data and the committed files; the app tests take most of its
+roughly 75 seconds. They cover the cleaning rules, the dollar conversion and its check, the reliability bands, the margin formulas, the
+add-up checks, the keys and geographies, determinism, the map's shading and hover text, the app at both map levels, and that the numbers
+in the README and this page match the data. GitHub Actions runs them on every push.
+
+## Deployment notes
+
+The dashboard runs on Render's free plan as a Streamlit web service (`render.yaml`): build command `pip install -r requirements.txt`,
+start command `streamlit run app.py --server.port $PORT --server.address 0.0.0.0`, Python from `.python-version`. The app reads only
+`data/processed/`; no API key is needed to run it. Streamlit's built-in health check is `/_stcore/health` (set it as the service's
+health check path in the Render dashboard, which overrides the reference config). A free service sleeps after about 15 minutes idle, and
+the first request afterward takes about 20 to 30 seconds.

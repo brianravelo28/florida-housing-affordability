@@ -74,6 +74,43 @@ def test_bottom_coded_hover_says_below_and_top_coded_says_above(make_raw, cleane
     assert 'at or above $250,001' in hover.iloc[1]
 
 
+def test_every_measure_says_how_many_households_the_estimate_covers(make_raw, cleaned):
+    raw = make_raw({'B25003_002E': 1234, 'B25003_003E': 567, 'B25003_001E': 1801, 'B25070_001E': 500, 'B25070_011E': 50})
+    frame = cleaned(raw)
+    expected = {'Median home value': 'Based on about 1,234 owner households',
+                'Median gross rent (monthly)': 'Based on about 567 renter households',
+                'Median household income': 'Based on about 1,801 households',
+                'Home value to owner income ratio': 'Based on about 1,234 owner households',
+                'Renters paying 30% or more of income on rent': 'Based on about 450 renter households with rent computed'}
+    for metric, text in expected.items():
+        assert text in view.map_frame(frame, metric)['hover'].iloc[0], metric
+
+
+def test_a_household_count_under_30_is_flagged_in_the_hover(make_raw, cleaned):
+    hover = view.map_frame(cleaned(make_raw({'B25003_002E': 20})), 'Median home value')['hover'].iloc[0]
+    assert 'about 20 owner households (fewer than 30: read with care)' in hover
+    assert 'fewer than 30' not in view.map_frame(cleaned(make_raw({'B25003_002E': 30})), 'Median home value')['hover'].iloc[0]
+
+
+def test_gray_areas_also_show_their_household_count(home_values):
+    hover = view.map_frame(home_values, 'Median home value')['hover']
+    assert 'Not shaded' in hover[3] and 'Based on about 100 owner households' in hover[3]
+    assert view.map_frame(home_values, 'Median home value')['households'].tolist() == [100] * 5
+
+
+def test_deployment_info_reads_memory_commit_and_versions(tmp_path):
+    status = tmp_path / 'status'
+    status.write_text('Name:\tpython\nVmRSS:\t  307200 kB\nThreads:\t4\n', encoding='utf-8')
+    info = view.deployment_info({'RENDER_GIT_COMMIT': 'abcdef1234567'}, str(status))
+    assert info['memory_mb'] == 300.0 and info['commit'] == 'abcdef1'
+    assert info['libraries']['pandas'] and info['libraries']['streamlit'] and info['python'].startswith('3.')
+
+
+def test_deployment_info_copes_with_no_proc_file_and_no_commit(tmp_path):
+    info = view.deployment_info({}, str(tmp_path / 'missing'))
+    assert info['memory_mb'] is None and info['commit'] is None
+
+
 def test_share_margin_is_in_percentage_points(make_raw, cleaned):
     raw = make_raw({'B25070_001E': 200, 'B25070_011E': 20, 'B25070_007E': 20, 'B25070_008E': 20,
                     'B25070_009E': 10, 'B25070_010E': 10, 'B25070_007M': 4, 'B25070_008M': 4,

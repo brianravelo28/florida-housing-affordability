@@ -130,6 +130,11 @@ with st.sidebar:
         if choice != 'All of Florida':
             county_geoid = next(g for g, n in county_names.items() if n == choice)
     st.caption("Dollar figures are in 2024 dollars. Each ACS period covers five years of survey responses.")
+    with st.expander("About this deployment"):
+        info = view.deployment_info()
+        st.caption(f"Deployed commit: {info['commit'] or 'not on Render (local run)'}")
+        st.caption(f"Python {info['python']}; " + ", ".join(f"{k} {v}" for k, v in info['libraries'].items() if v))
+        st.caption("Memory in use by this process: " + (f"about {info['memory_mb']:,.0f} MB" if info['memory_mb'] else "not reported here"))
 
 spec = view.METRICS[metric]
 
@@ -147,12 +152,14 @@ def table_view(frame, kind, label):
         label: frame['value'],
         'Margin of error (90%)': frame['moe'],
         'CV (%)': frame['cv'],
+        'Households behind it': frame['households'],
         'Reliability': [view.band_text(b) if b not in ('ratio', 'component') else '' for b in frame['band']],
         'Shaded on map': ~frame['gray'],
     })
     fmt = {'dollars': '${:,.0f}', 'share': '{:.1f}%', 'ratio': '{:.2f}x'}[kind]
     moe_fmt = '${:,.0f}' if kind == 'dollars' else '{:.1f}'
-    st.dataframe(out.style.format({label: fmt, 'Margin of error (90%)': moe_fmt, 'CV (%)': '{:.1f}'}, na_rep='-'),
+    st.dataframe(out.style.format({label: fmt, 'Margin of error (90%)': moe_fmt, 'CV (%)': '{:.1f}',
+                                   'Households behind it': '{:,.0f}'}, na_rep='-'),
                  hide_index=True, width='stretch')
 
 
@@ -174,7 +181,6 @@ with tab_map:
     fig, current = build_map(geography, metric, period, county_geoid)
     st.markdown(f"### {metric}, {period}" + (f" ({choice})" if county_geoid else ""))
     st.plotly_chart(fig, width='stretch')
-    st.caption(MAP_HINT)
 
     shaded_n = int((~current['gray']).sum())
     gray_counts = current.loc[current['gray'], 'band'].value_counts()
@@ -189,16 +195,25 @@ with tab_map:
         summary += f"; {int(gray_counts.sum()):,} gray ({', '.join(parts)})"
     st.markdown(f"**{summary}.**")
     reliability_box()
+    notes = [MAP_HINT,
+             "Counties use all three ACS periods; tracts use 2020-2024 only, because tract boundaries changed in 2020. "
+             "Each period pools five years of survey responses.",
+             "Water-only areas have no estimate."]
     if period != LATEST and spec['col'] in ('home_value', 'value_to_owner_income'):
-        st.caption("The Census Bureau did not adjust home values for inflation before its 2018-2022 release, so "
-                   f"{period} home values are converted to 2024 dollars with that period's average-year inflation "
-                   "factor (checked against a second method, within about 1% in value).")
+        notes.append("The Census Bureau did not adjust home values for inflation before its 2018-2022 release, so "
+                     f"{period} home values are converted to 2024 dollars with that period's average-year inflation "
+                     "factor (checked against a second method, within about 1% in value).")
     if spec['kind'] == 'ratio':
-        st.caption("This ratio divides the median value of owner-occupied homes by the median income of owner households "
-                   "(both cover owners only), so it has no margin of error of its own. It is shaded only where both "
-                   "medians are reliable.")
+        notes.append("This ratio divides the median value of owner-occupied homes by the median income of owner households "
+                     "(both cover owners only), so it has no margin of error of its own. It is shaded only where both "
+                     "medians are reliable.")
+    with st.expander("About this map"):
+        st.markdown("\n".join(f"- *{n}*" for n in notes))
     with st.expander("View as table"):
         table_view(current.sort_values('name'), spec['kind'], spec['short'])
+    with st.expander("About this table"):
+        st.markdown("- *Click a column header to sort. \"Households behind it\" is the Census Bureau's estimate of the "
+                    "households the figure covers, not a survey sample size; under 30 is flagged in the hover.*")
 
 with tab_time:
     st.markdown(f"### {metric} by county across ACS periods")
@@ -221,16 +236,23 @@ with tab_time:
                       labels={'value': f"{metric} ({spec['unit']})"})
         fig.update_layout(height=480, font=dict(size=15), margin=dict(t=20))
         st.plotly_chart(fig, width='stretch')
-        st.caption(("Whiskers show the margin of error (90%). " if series['moe'].notna().any() else "") + CHART_HINT)
     else:
         st.info("None of the selected areas has a reliable estimate for this measure.")
-    st.caption("ACS periods are non-overlapping five-year windows, which the Census Bureau advises for comparisons. "
-               "Counties keep the same boundaries across all three.")
+    st.markdown(f"**{series['Area'].nunique()} areas shown: Florida and {len(chosen_names)} "
+                f"{'county' if len(chosen_names) == 1 else 'counties'}.**")
+    chart_notes = ([CHART_HINT] + (["Whiskers show the margin of error (90%)."] if series['moe'].notna().any() else [])
+                   + ["ACS periods are non-overlapping five-year windows, which the Census Bureau advises for comparisons; "
+                      "counties keep the same boundaries across all three.",
+                      "Areas without a reliable estimate are left out of the lines."])
+    with st.expander("About this chart"):
+        st.markdown("\n".join(f"- *{n}*" for n in chart_notes))
     with st.expander("View as table"):
         wide = series.pivot(index='Area', columns='Period', values='value').reindex(columns=PERIODS)
         fmt = {'dollars': '${:,.0f}', 'share': '{:.1f}%', 'ratio': '{:.2f}x'}[spec['kind']]
         st.dataframe(wide.reset_index().style.format({p: fmt for p in PERIODS}, na_rep='-'),
                      hide_index=True, width='stretch')
+    with st.expander("About this table"):
+        st.markdown("- *One row per area and one column per period; a dash means the estimate was not reliable enough to show.*")
 
 with tab_about:
     st.markdown("### About the data")
