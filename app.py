@@ -28,6 +28,9 @@ small, [data-testid="stCaptionContainer"], [data-testid="stMetricLabel"] { font-
 
 PROCESSED = cfg.PROCESSED_DIR
 GRAY = '#b0b0b0'
+# Streamlit keeps every map it draws. On the host, memory rose from about 213 MB to about 400 MB over about ten drawn maps
+# (a tract map is about 3.7 MB when pickled), and the free plan has 512 MB, so only the most recent maps are kept.
+MAX_CACHED_MAPS = 8
 CHART_HINT = "💡 Drag to zoom • Double-click to reset"
 MAP_HINT = "💡 Scroll to zoom • Drag to pan • Hover or tap an area for its figure and margin of error"
 
@@ -64,7 +67,7 @@ county_names = dict(zip(counties.loc[counties['period'] == LATEST, 'geoid'],
 # MAP
 # ============================================================================
 
-@st.cache_data(show_spinner="Drawing the map...")
+@st.cache_data(show_spinner="Drawing the map...", max_entries=MAX_CACHED_MAPS)
 def build_map(geography, metric, period, county_geoid):
     spec = view.METRICS[metric]
     shapes = load_shapes('counties' if geography == 'Counties' else 'tracts')

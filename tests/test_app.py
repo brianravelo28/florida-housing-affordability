@@ -4,6 +4,7 @@ zoom, a county with few tracts, a timeline with nothing selected, and the notice
 """
 
 import os
+import re
 
 import pytest
 from streamlit.testing.v1 import AppTest
@@ -92,6 +93,13 @@ def test_the_reliability_box_stays_visible_and_is_not_in_a_collapsed_section():
 def test_the_deployment_panel_names_python_and_libraries():
     text = ' '.join(c.value for c in fresh().caption)
     assert 'Python 3.' in text and 'streamlit' in text and 'Memory in use by this process' in text
+
+
+def test_the_map_cache_is_bounded_so_hosted_memory_cannot_grow_without_limit():
+    source = open(APP, encoding='utf-8').read()
+    assert 'max_entries=MAX_CACHED_MAPS' in source
+    limit = int(re.search(r'^MAX_CACHED_MAPS = (\d+)', source, re.M).group(1))
+    assert 1 <= limit <= 10     # a tract map is about 18 MB in the hosted process; 10 of them stay under the 512 MB plan limit
 
 
 def test_the_page_carries_the_census_bureau_notice():
