@@ -40,6 +40,9 @@ low_ratio_3_county,Taylor
 low_ratio_3,2.071958055
 counties_ratio_rose,63
 counties_ratio_compared,67
+counties_ratio_rose_beyond_margin,53
+counties_ratio_fell,4
+counties_ratio_fell_beyond_margin,0
 tracts_total,5160
 tracts_with_ratio,4532
 tracts_ratio_5x_pct,19.96910856134157

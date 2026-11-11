@@ -146,8 +146,15 @@ The as-published values are kept in the data (the `*_as_published` columns) so e
   owner-occupied homes only, so the denominator is the income of owner households, not of all households: owners earn more than
   renters, and dividing by all households would compare two different groups. With the median income of all households the ratio
   would be 3.4, 4.0, 4.8 for the three periods instead of 2.8, 3.3, 4.1. It compares two medians for the same area and period, so
-  it has no margin of error of its own; the map shades it only where both medians are reliable. It describes places, not the
+  the map shows no margin of error for it and shades it only where both medians are reliable. It describes places, not the
   situation of any one household.
+- **Comparing ratios.** To say whether two counties' ratios, or one county's ratio in two periods, differ, an approximate 90% margin
+  is computed with the Census Bureau's formula for a ratio, sqrt(margin of the value^2 + ratio^2 x margin of the income^2) divided
+  by the income. Two ratios are treated as different only when they differ by more than the square root of the sum of their squared
+  margins. The formula assumes the two medians are independent; they come from the same survey, so this is an approximation. It
+  gives the README's statements that the ratio rose in 63 of 67 counties and by more than its margin in 53 (and fell, by less than
+  its margin, in four), that Monroe and Collier are clearly above every other county, and that the next three, and the lowest three,
+  cannot be told apart. Tests fail if any of these stops being true.
 - **Renters paying 30% or more of income on rent:** the four 30%+ bins of table B25070 divided by renter households with rent
   computed (the total minus "not computed"). The margin of error follows the Census Bureau's formula for a proportion whose numerator is
   part of its denominator, falling back to its ratio formula when the term under the root is negative.
@@ -173,4 +180,5 @@ no housing units and no estimates, and the pipeline fails if a tract with housin
 - A median describes the middle household or home, not the spread.
 - ACS periods pool five years, so a figure is not a snapshot of one year, and the overlap rules mean only non-overlapping periods are compared.
 - The Census Bureau reports only a limit for medians in the open-ended intervals (for example the highest-valued tracts), so those are gray.
+- Differences between areas or periods are called real only when they exceed the combined margin of error.
 - Patterns show where and when costs differ; they do not show why.

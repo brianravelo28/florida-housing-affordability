@@ -7,6 +7,7 @@ tests/test_findings.py checks that the README contains every number listed in re
 
 import os
 
+import numpy as np
 import pandas as pd
 
 import acs_config as cfg
@@ -25,6 +26,30 @@ def read_tables(directory=None):
 def usable_ratio(df):
     """Rows where both medians behind the home value to owner income ratio are reliable enough to map"""
     return ~df['home_value_band'].isin(view.GRAY_BANDS) & ~df['owner_income_band'].isin(view.GRAY_BANDS)
+
+
+def ratio_margin(value, value_moe, income, income_moe):
+    """
+    Approximate 90% margin of error of the ratio value / income, from the Census Bureau's formula for a ratio:
+    sqrt(moe_value^2 + ratio^2 * moe_income^2) / income. The formula assumes the two medians are independent; they
+    come from the same survey, so this is an approximation used only to judge differences, not shown on the map.
+    """
+    ratio = value / income
+    return np.sqrt(value_moe ** 2 + ratio ** 2 * income_moe ** 2) / income
+
+
+def county_ratios(counties, period):
+    """One row per county: name, ratio and its approximate margin, for one period"""
+    d = counties[counties['period'] == period]
+    out = pd.DataFrame({'geoid': d['geoid'].values, 'name': d['name'].map(view.short_name).str.replace(' County', '').values,
+                        'ratio': d['value_to_owner_income'].values}, index=d.index)
+    out['margin'] = ratio_margin(d['home_value'], d['home_value_moe'], d['owner_income'], d['owner_income_moe'])
+    return out.reset_index(drop=True)
+
+
+def separated(ratio_a, margin_a, ratio_b, margin_b):
+    """True when two ratios differ by more than their combined margin of error"""
+    return abs(ratio_a - ratio_b) > np.sqrt(margin_a ** 2 + margin_b ** 2)
 
 
 def compute(state, counties, tracts):
@@ -57,6 +82,12 @@ def compute(state, counties, tracts):
     change = (pivot[PERIOD_LAST] - pivot[PERIOD_FIRST]).dropna()
     out['counties_ratio_rose'] = int((change > 0).sum())
     out['counties_ratio_compared'] = len(change)
+    first, last = county_ratios(counties, PERIOD_FIRST).set_index('geoid'), county_ratios(counties, PERIOD_LAST).set_index('geoid')
+    shift = (last['ratio'] - first['ratio']).dropna()
+    combined = np.sqrt(last['margin'] ** 2 + first['margin'] ** 2).reindex(shift.index)
+    out['counties_ratio_rose_beyond_margin'] = int((shift > combined).sum())
+    out['counties_ratio_fell'] = int((shift < 0).sum())
+    out['counties_ratio_fell_beyond_margin'] = int((-shift > combined).sum())
 
     ok = tracts[usable_ratio(tracts)]
     ratio = ok['value_to_owner_income']
@@ -79,7 +110,7 @@ def readme_facts(f):
         f"{f['ratio_first']:.1f}", f"{f['ratio_mid']:.1f}", f"{f['ratio_last']:.1f}",
         f"${f['rent_first']:,.0f}", f"${f['rent_last']:,.0f}", f"{f['rent_growth_pct']:.0f}%",
         f"{f['renter_share_first']:.1f}%", f"{f['renter_share_mid']:.1f}%", f"{f['renter_share_last']:.1f}%",
-        f"{f['counties_ratio_rose']} of {f['counties_ratio_compared']}",
+        f"{f['counties_ratio_rose']} of {f['counties_ratio_compared']}", f"in {f['counties_ratio_rose_beyond_margin']} of them",
         f"{f['tracts_with_ratio']:,}", f"{f['tracts_ratio_5x_pct']:.0f}%", f"{f['tracts_ratio_6x_pct']:.1f}%",
     ]
     for rank in range(1, RANK_COUNT + 1):
