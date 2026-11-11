@@ -6,7 +6,7 @@ Rules (each one is counted; the counts are written to data/processed/cleaning_lo
   2. A median whose margin of error is -333333333 is top-coded (the estimate is only the cap), so it is
      flagged and left out of medians and map colors; the cap is kept in its own column.
   3. Reliability: CV = (margin of error / 1.645) / estimate, banded high (<12%), moderate (12-40%),
-     low (>40%) using the Census Bureau's ACS handbook convention.
+     low (>40%) using the bands an Esri report proposes and the Census Bureau's rural-users handbook quotes.
   4. Dollar figures are converted to 2024 dollars. Income and rent use the factors the Census Bureau publishes
      (it adjusts them to each period's final year). Home values from the 2010-2014 and 2015-2019 releases, which
      Census did not adjust, use the average-year CPI-U factor (see acs_config.home_value_factor).
@@ -116,8 +116,8 @@ def clean_count(df, name, base, log):
 def proportion_moe(numerator, num_moe, denominator, den_moe):
     """
     Margin of error of a proportion p = numerator / denominator where the numerator is a subset of the
-    denominator (Census ACS handbook formula). If the term under the root is negative, the ratio formula
-    is used instead, as the handbook prescribes.
+    denominator (Census Bureau formula for a proportion). If the term under the root is negative, the ratio
+    formula is used instead, as that formula prescribes.
     """
     p = numerator / denominator
     inside = num_moe ** 2 - p ** 2 * den_moe ** 2

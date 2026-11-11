@@ -128,7 +128,7 @@ def test_short_names(name, expected):
     assert view.short_name(name) == expected
 
 
-def test_reliability_bands_are_spelled_out_as_the_handbook_gives_them():
+def test_reliability_bands_are_spelled_out_for_readers():
     assert view.RELIABILITY_BANDS == [('High reliability', 'CV under 12%', 'shaded'),
                                       ('Moderate reliability', 'CV 12% to 40%', 'shaded'),
                                       ('Low reliability', 'CV over 40%', 'gray')]

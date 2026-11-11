@@ -27,9 +27,12 @@ B25001 and B25003, retrieved through the Census Bureau Data API.
 
 ## Reliability
 
-U.S. Census Bureau, *Understanding and Using American Community Survey Data: What All Data Users Need to Know* and the ACS handbook
-for rural data users (coefficient of variation: under 12% high, 12% to 40% moderate, over 40% low). The cutoffs are a handbook
-convention, not a formal standard.
+U.S. Census Bureau, *Understanding and Using American Community Survey Data: What Users of Data for Rural Areas Need to Know*
+(2020), chapter 4, section "Assessing ACS Data Reliability": the coefficient of variation (margin of error divided by 1.645,
+divided by the estimate) and, in footnote 29, the three bands (under 12% high, 12% to 40% moderate, over 40% low), which it
+attributes to Esri, *American Community Survey (ACS): Understanding Margin of Error*,
+https://doc.arcgis.com/en/esri-demographics/data/acs.htm. The cutoffs are an Esri guideline that the Census Bureau quotes, not a
+Census Bureau standard.
 
 ## Boundaries
 

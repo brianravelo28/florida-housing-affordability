@@ -29,7 +29,7 @@ Between 2010-2014 and 2020-2024, in 2024 dollars:
 
 - **Map:** counties (all three periods) or census tracts (2020-2024), shaded by home value, rent, income, the home value to income ratio, or the share of renters paying 30%+ of income on rent. Hover for the estimate, its margin of error and its reliability rating; zoom to any county. A table view sits under each map.
 - **County timeline:** compare counties across the three periods, with error bars for the margin of error.
-- **Reliability:** the Census Bureau's ACS handbook rates an estimate by its coefficient of variation (CV, the margin of error divided by 1.645, divided by the estimate): **under 12%** high reliability, **12% to 40%** moderate, **over 40%** low. Areas with low reliability, no estimate or a top-coded value are drawn gray. The cutoffs are the handbook's convention, not a formal standard; the dashboard spells them out under every map.
+- **Reliability:** the Census Bureau recommends judging an estimate by its coefficient of variation (CV: the margin of error divided by 1.645, divided by the estimate). The dashboard uses three bands that an Esri report proposes and the Census Bureau's handbook for rural data users quotes: **under 12%** high reliability, **12% to 40%** moderate, **over 40%** low. At over 40% the 90% margin of error is about two-thirds of the estimate or more, so the true value could be anywhere from about a third of the figure to about 1.7 times it. Areas with low reliability, no estimate or a top-coded value are drawn gray. The cutoffs are a convention, not a Census Bureau standard; the dashboard spells them out under every map.
 
 ## The data
 

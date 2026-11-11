@@ -98,8 +98,9 @@ VARIABLES = [v for base in ALL_BASES for v in _estimate_and_margin(base)]
 SPECIAL_VALUE_CEILING = -200_000_000
 TOP_CODED_MARGIN = -333_333_333
 
-# Reliability bands from the Census Bureau's ACS handbook (a convention, not a formal standard):
-# coefficient of variation (CV) = (margin of error / 1.645) / estimate
+# Reliability: the Census Bureau recommends the coefficient of variation, CV = (margin of error / 1.645) / estimate.
+# The three bands are an Esri guideline that the Census Bureau's handbook for rural data users quotes (chapter 4,
+# footnote 29): a convention, not a Census Bureau standard.
 Z_90 = 1.645
 CV_HIGH_BELOW = 12.0   # CV under 12%: high reliability
 CV_LOW_ABOVE = 40.0    # CV over 40%: low reliability (grayed out on the map); 12%-40% is moderate

@@ -77,7 +77,9 @@ Every estimate has a margin of error at 90% confidence. The coefficient of varia
 
 CV = (margin of error / 1.645) / estimate
 
-The Census Bureau's ACS handbook (*Understanding and Using American Community Survey Data*) rates estimates by CV:
+The Census Bureau recommends the CV as the measure of an estimate's reliability. Its handbook for rural data users
+(*Understanding and Using American Community Survey Data: What Users of Data for Rural Areas Need to Know*, chapter 4, "Assessing
+ACS Data Reliability") applies three bands that, in its words, a 2014 report from Esri proposes (footnote 29):
 
 | CV | Rating | On the map |
 |----|--------|-----------|
@@ -85,9 +87,11 @@ The Census Bureau's ACS handbook (*Understanding and Using American Community Su
 | 12% to 40% | Moderate reliability | Shaded |
 | Over 40% | Low reliability | Gray |
 
-Areas with no estimate, or a top-coded median, are also gray. The 12% and 40% cutoffs are the handbook's convention, not a formal
-standard; other Census Bureau papers use other cutoffs (for example 15% and 30%). The same rule is applied to every measure so
-the maps are comparable. Each area's rating appears in the hover text and in the table views.
+The 12% and 40% cutoffs are therefore an Esri guideline that the Census Bureau quotes, a convention and not a Census Bureau
+standard. At a CV of 40% the 90% margin of error is 1.645 x 0.40, about 66% of the estimate, so the true value could plausibly be
+anywhere from about a third of the figure to about 1.7 times it; the map does not shade an estimate that uncertain. Areas with no
+estimate, or a top-coded median, are also gray. The same rule is applied to every measure so the maps are comparable. Each area's
+rating appears in the hover text and in the table views.
 
 ## Dollars
 

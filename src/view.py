@@ -43,7 +43,7 @@ BAND_TEXT = {
     'not_rated': 'Share is 0% (reliability not defined)',
 }
 
-# The Census Bureau's ACS handbook convention, spelled out for readers
+# The reliability bands (an Esri guideline quoted in the Census Bureau's rural-users handbook), spelled out for readers
 RELIABILITY_BANDS = [
     ('High reliability', 'CV under 12%', 'shaded'),
     ('Moderate reliability', 'CV 12% to 40%', 'shaded'),

@@ -66,7 +66,7 @@ def test_cv_is_missing_without_a_positive_estimate_or_margin():
 
 @pytest.mark.parametrize('cv,expected', [(0.0, 'high'), (11.99, 'high'), (12.0, 'moderate'),
                                          (40.0, 'moderate'), (40.01, 'low'), (150.0, 'low')])
-def test_band_edges_follow_the_handbook_convention(cv, expected):
+def test_band_edges_follow_the_documented_cutoffs(cv, expected):
     assert clean.band(pd.Series([cv])).iloc[0] == expected
 
 

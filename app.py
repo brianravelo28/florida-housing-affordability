@@ -159,13 +159,15 @@ def table_view(frame, kind, label):
 def reliability_box():
     st.info(
         "**How reliable is each estimate?** Every figure comes from a survey, so it carries a margin of error "
-        "(at 90% confidence). The coefficient of variation (CV) is the margin of error divided by 1.645, then divided by "
-        "the estimate. The Census Bureau's ACS handbook rates estimates this way:\n\n"
+        "(at 90% confidence). The Census Bureau recommends judging reliability by the coefficient of variation (CV): the "
+        "margin of error divided by 1.645, then divided by the estimate. The three bands below come from an Esri report "
+        "that the Census Bureau's handbook for rural data users quotes (chapter 4):\n\n"
         "- **Under 12%:** high reliability\n"
         "- **12% to 40%:** moderate reliability\n"
-        "- **Over 40%:** low reliability, drawn in **gray** because an estimate this uncertain should not be read as precise\n\n"
+        "- **Over 40%:** low reliability, drawn in **gray**: the margin of error is then about two-thirds of the estimate "
+        "or more, so the true value could be anywhere from about a third of the figure to about 1.7 times it\n\n"
         "Areas with no estimate, or a top-coded value (the Census Bureau reports only a floor), are gray too. "
-        "The 12% and 40% cutoffs are the handbook's convention, not a formal standard. Each area's band appears when you hover over it.")
+        "The cutoffs are a convention, not a Census Bureau standard. Each area's band appears when you hover over it.")
 
 
 with tab_map:
