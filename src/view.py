@@ -27,8 +27,8 @@ METRICS = {
                                     'short': 'Median gross rent'},
     'Median household income': {'col': 'income', 'kind': 'dollars', 'scale': 'YlGnBu', 'unit': '2024 dollars',
                                 'short': 'Median household income'},
-    'Home value to income ratio': {'col': 'value_to_income', 'kind': 'ratio', 'scale': 'YlOrRd', 'unit': 'times income',
-                                   'short': 'Home value / income'},
+    'Home value to owner income ratio': {'col': 'value_to_owner_income', 'kind': 'ratio', 'scale': 'YlOrRd',
+                                         'unit': 'times owner income', 'short': 'Home value / owner income'},
     'Renters paying 30% or more of income on rent': {'col': 'renters_30plus_share', 'kind': 'share', 'scale': 'YlOrRd',
                                                       'unit': '% of renter households', 'short': 'Renters paying 30%+'},
 }
@@ -38,7 +38,7 @@ BAND_TEXT = {
     'moderate': 'Moderate reliability',
     'low': 'Low reliability',
     'no_estimate': 'No estimate available',
-    'top_coded': 'Top-coded',
+    'top_coded': 'Open-ended (top- or bottom-coded)',
     'no_margin': 'Margin of error not available',
     'not_rated': 'Share is 0% (reliability not defined)',
 }
@@ -80,10 +80,12 @@ def fmt_margin(kind, moe):
 
 
 def _top_code_text(df, col, kind):
-    cap = df.get(col + '_top_code_published')
-    if cap is None or kind != 'dollars':
+    cap, direction = df.get(col + '_top_code_published'), df.get(col + '_open_end')
+    if cap is None or direction is None or kind != 'dollars':
         return pd.Series('', index=df.index)
-    return cap.map(lambda v: f" The Census Bureau reports only that the median is at or above ${v:,.0f}." if pd.notna(v) else '')
+    word = {'above': 'above', 'below': 'below'}
+    return pd.Series([f" The Census Bureau reports only that the median is at or {word[d]} ${v:,.0f}."
+                      if pd.notna(v) and d in word else '' for v, d in zip(cap, direction)], index=df.index)
 
 
 def map_frame(df, metric):
@@ -97,7 +99,7 @@ def map_frame(df, metric):
     out = pd.DataFrame({'geoid': df['geoid'].values, 'name': df['name'].map(short_name).values}, index=df.index)
 
     if kind == 'ratio':
-        parts = {'home value': 'home_value', 'income': 'income'}
+        parts = {'home value': 'home_value', 'owner income': 'owner_income'}
         bands = {label: df[c + '_band'] for label, c in parts.items()}
         gray = pd.Series(False, index=df.index)
         for b in bands.values():
@@ -117,8 +119,8 @@ def map_frame(df, metric):
                     f"<b>{out.at[i, 'name']}</b><br>{spec['short']}: {fmt_value(kind, out.at[i, 'value'])}"
                     f"<br>Median home value {fmt_value('dollars', df.at[i, 'home_value'])}: "
                     f"{band_text(bands['home value'][i], df.at[i, 'home_value_cv'])}"
-                    f"<br>Median household income {fmt_value('dollars', df.at[i, 'income'])}: "
-                    f"{band_text(bands['income'][i], df.at[i, 'income_cv'])}"
+                    f"<br>Median owner-household income {fmt_value('dollars', df.at[i, 'owner_income'])}: "
+                    f"{band_text(bands['owner income'][i], df.at[i, 'owner_income_cv'])}"
                     "<br><i>A ratio of two medians; it has no margin of error of its own.</i>")
         out['gray'] = gray
         out['hover'] = hover

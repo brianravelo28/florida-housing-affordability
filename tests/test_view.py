@@ -45,20 +45,33 @@ def test_gray_hover_explains_why_it_is_not_shaded(home_values):
     hover = view.map_frame(home_values, 'Median home value')['hover']
     assert 'Not shaded' in hover[2] and 'Low reliability' in hover[2]
     assert 'No estimate available' in hover[3]
-    assert 'Top-coded' in hover[4] and '2,000,001' in hover[4]
+    assert 'Open-ended' in hover[4] and 'at or above $2,000,001' in hover[4]
 
 
 def test_ratio_needs_both_medians_to_be_usable(make_raw, cleaned):
     raw = make_raw(
-        {**HIGH, 'B19013_001E': 80000, 'B19013_001M': 1000},                      # usable
-        {**HIGH, 'B19013_001E': 80000, 'B19013_001M': 80000},                     # income unreliable
-        {**LOW, 'B19013_001E': 80000, 'B19013_001M': 1000},                       # home value unreliable
+        {**HIGH, 'B25119_002E': 80000, 'B25119_002M': 1000},                      # usable
+        {**HIGH, 'B25119_002E': 80000, 'B25119_002M': 80000},                     # owner income unreliable
+        {**LOW, 'B25119_002E': 80000, 'B25119_002M': 1000},                       # home value unreliable
     )
-    frame = view.map_frame(cleaned(raw), 'Home value to income ratio')
+    frame = view.map_frame(cleaned(raw), 'Home value to owner income ratio')
     assert frame['gray'].tolist() == [False, True, True]
     assert frame['value'].iloc[0] == pytest.approx(5.0, rel=1e-6)
-    assert 'income' in frame['hover'].iloc[1].lower() and 'Low reliability' in frame['hover'].iloc[1]
-    assert 'no margin of error' in frame['hover'].iloc[0]
+    assert 'owner income' in frame['hover'].iloc[1].lower() and 'Low reliability' in frame['hover'].iloc[1]
+    assert 'no margin of error' in frame['hover'].iloc[0] and 'owner-household income' in frame['hover'].iloc[0]
+
+
+def test_ratio_does_not_depend_on_all_household_income(make_raw, cleaned):
+    raw = make_raw({**HIGH, 'B19013_001E': SENT_NA, 'B19013_001M': SENT_NO_MOE, 'B25119_002E': 100000, 'B25119_002M': 1000})
+    frame = view.map_frame(cleaned(raw), 'Home value to owner income ratio')
+    assert not frame['gray'].iloc[0] and frame['value'].iloc[0] == pytest.approx(4.0)
+
+
+def test_bottom_coded_hover_says_below_and_top_coded_says_above(make_raw, cleaned):
+    raw = make_raw({'B19013_001E': 2499, 'B19013_001M': SENT_TOP}, {'B19013_001E': 250001, 'B19013_001M': SENT_TOP})
+    hover = view.map_frame(cleaned(raw), 'Median household income')['hover']
+    assert 'at or below $2,499' in hover.iloc[0]
+    assert 'at or above $250,001' in hover.iloc[1]
 
 
 def test_share_margin_is_in_percentage_points(make_raw, cleaned):

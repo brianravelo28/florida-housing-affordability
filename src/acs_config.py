@@ -63,7 +63,9 @@ def home_value_factor(api_year):
 MEDIANS = {
     'home_value': 'B25077_001',   # median value (dollars), owner-occupied units
     'rent': 'B25064_001',         # median gross rent (dollars)
-    'income': 'B19013_001',       # median household income, past 12 months
+    'income': 'B19013_001',       # median household income, past 12 months, all households
+    'owner_income': 'B25119_002', # median household income of owner-occupied households (the like-for-like
+                                  # denominator for median home value, which covers owner-occupied homes only)
 }
 
 # Rent as a percent of household income (B25070): total, the four 30%+ bins, and "not computed"
@@ -97,6 +99,9 @@ VARIABLES = [v for base in ALL_BASES for v in _estimate_and_margin(base)]
 # Any negative value below -200,000,000 is treated as special.
 SPECIAL_VALUE_CEILING = -200_000_000
 TOP_CODED_MARGIN = -333_333_333
+# With that margin the estimate is the limit of an open-ended interval. The lowest interval for income medians is
+# reported as 2,499 ("2,500-"); anything above this value is the top interval ("250,000+", "2,000,000+").
+LOW_OPEN_END_MAX = 2500
 
 # Reliability: the Census Bureau recommends the coefficient of variation, CV = (margin of error / 1.645) / estimate.
 # The three bands are an Esri guideline that the Census Bureau's handbook for rural data users quotes (chapter 4,

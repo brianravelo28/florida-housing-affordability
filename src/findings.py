@@ -23,8 +23,8 @@ def read_tables(directory=None):
 
 
 def usable_ratio(df):
-    """Rows where both medians behind the home value to income ratio are reliable enough to map"""
-    return ~df['home_value_band'].isin(view.GRAY_BANDS) & ~df['income_band'].isin(view.GRAY_BANDS)
+    """Rows where both medians behind the home value to owner income ratio are reliable enough to map"""
+    return ~df['home_value_band'].isin(view.GRAY_BANDS) & ~df['owner_income_band'].isin(view.GRAY_BANDS)
 
 
 def compute(state, counties, tracts):
@@ -33,35 +33,37 @@ def compute(state, counties, tracts):
     out = {}
     for period, tag in ((PERIOD_FIRST, 'first'), (PERIOD_MID, 'mid'), (PERIOD_LAST, 'last')):
         out[f'home_value_{tag}'] = s.loc[period, 'home_value']
-        out[f'income_{tag}'] = s.loc[period, 'income']
+        out[f'owner_income_{tag}'] = s.loc[period, 'owner_income']
+        # sensitivity: the same ratio with the income of all households (owners and renters) as the denominator
+        out[f'ratio_all_households_{tag}'] = s.loc[period, 'home_value'] / s.loc[period, 'income']
         out[f'rent_{tag}'] = s.loc[period, 'rent']
-        out[f'ratio_{tag}'] = s.loc[period, 'value_to_income']
+        out[f'ratio_{tag}'] = s.loc[period, 'value_to_owner_income']
         out[f'renter_share_{tag}'] = s.loc[period, 'renters_30plus_share']
     out['renter_share_moe_last'] = s.loc[PERIOD_LAST, 'renters_30plus_share_moe']
-    for measure in ('home_value', 'income', 'rent'):
+    for measure in ('home_value', 'owner_income', 'rent'):
         out[f'{measure}_growth_pct'] = (out[f'{measure}_last'] / out[f'{measure}_first'] - 1) * 100
 
     latest = counties[counties['period'] == PERIOD_LAST]
-    usable = latest[usable_ratio(latest)].sort_values('value_to_income', ascending=False)
+    usable = latest[usable_ratio(latest)].sort_values('value_to_owner_income', ascending=False)
     out['counties_with_ratio'] = len(usable)
     for rank, (_, row) in enumerate(usable.head(RANK_COUNT).iterrows(), 1):
         out[f'top_ratio_{rank}_county'] = view.short_name(row['name']).replace(' County', '')
-        out[f'top_ratio_{rank}'] = row['value_to_income']
-    for rank, (_, row) in enumerate(usable.tail(3).sort_values('value_to_income').iterrows(), 1):
+        out[f'top_ratio_{rank}'] = row['value_to_owner_income']
+    for rank, (_, row) in enumerate(usable.tail(3).sort_values('value_to_owner_income').iterrows(), 1):
         out[f'low_ratio_{rank}_county'] = view.short_name(row['name']).replace(' County', '')
-        out[f'low_ratio_{rank}'] = row['value_to_income']
+        out[f'low_ratio_{rank}'] = row['value_to_owner_income']
 
-    pivot = counties.pivot(index='geoid', columns='period', values='value_to_income')
+    pivot = counties.pivot(index='geoid', columns='period', values='value_to_owner_income')
     change = (pivot[PERIOD_LAST] - pivot[PERIOD_FIRST]).dropna()
     out['counties_ratio_rose'] = int((change > 0).sum())
     out['counties_ratio_compared'] = len(change)
 
     ok = tracts[usable_ratio(tracts)]
-    ratio = ok['value_to_income']
+    ratio = ok['value_to_owner_income']
     out['tracts_total'] = len(tracts)
     out['tracts_with_ratio'] = len(ok)
     out['tracts_ratio_5x_pct'] = (ratio >= 5).mean() * 100
-    out['tracts_ratio_8x_pct'] = (ratio >= 8).mean() * 100
+    out['tracts_ratio_6x_pct'] = (ratio >= 6).mean() * 100
     return out
 
 
@@ -73,12 +75,12 @@ def readme_facts(f):
     """The strings the README findings must contain, built from the computed numbers"""
     facts = [
         money_k(f['home_value_first']), money_k(f['home_value_last']), f"{f['home_value_growth_pct']:.0f}%",
-        money_k(f['income_first'], 1), money_k(f['income_last'], 1), f"{f['income_growth_pct']:.0f}%",
+        money_k(f['owner_income_first'], 1), money_k(f['owner_income_last'], 1), f"{f['owner_income_growth_pct']:.0f}%",
         f"{f['ratio_first']:.1f}", f"{f['ratio_mid']:.1f}", f"{f['ratio_last']:.1f}",
         f"${f['rent_first']:,.0f}", f"${f['rent_last']:,.0f}", f"{f['rent_growth_pct']:.0f}%",
         f"{f['renter_share_first']:.1f}%", f"{f['renter_share_mid']:.1f}%", f"{f['renter_share_last']:.1f}%",
         f"{f['counties_ratio_rose']} of {f['counties_ratio_compared']}",
-        f"{f['tracts_with_ratio']:,}", f"{f['tracts_ratio_5x_pct']:.0f}%", f"{f['tracts_ratio_8x_pct']:.1f}%",
+        f"{f['tracts_with_ratio']:,}", f"{f['tracts_ratio_5x_pct']:.0f}%", f"{f['tracts_ratio_6x_pct']:.1f}%",
     ]
     for rank in range(1, RANK_COUNT + 1):
         facts += [f[f'top_ratio_{rank}_county'], f"{f[f'top_ratio_{rank}']:.1f}"]

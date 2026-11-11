@@ -28,7 +28,7 @@ def test_top_coded_median_is_flagged_and_kept_out_of_values(make_raw, cleaned):
     assert out['home_value'].isna().all()
     assert out['home_value_band'].iloc[0] == 'top_coded'
     assert out['home_value_top_code_published'].iloc[0] == 2000001
-    assert out['value_to_income'].isna().all()  # a top-coded value must not feed the ratio
+    assert out['value_to_owner_income'].isna().all()  # a top-coded value must not feed the ratio
 
 
 def test_estimate_with_unavailable_margin_is_kept_but_not_rated(make_raw, cleaned):
@@ -153,19 +153,42 @@ def test_period_table_states_which_home_values_census_adjusted():
 
 # ---- derived measures ----------------------------------------------------------------------------------
 
-def test_value_to_income_ratio(make_raw, cleaned):
-    out = cleaned(make_raw({'B25077_001E': 400000, 'B19013_001E': 80000},
-                           {'B25077_001E': 400000, 'B19013_001E': SENT_NA, 'B19013_001M': SENT_NO_MOE}))
-    assert out['value_to_income'].iloc[0] == pytest.approx(5.0)
-    assert pd.isna(out['value_to_income'].iloc[1])
+def test_value_to_owner_income_ratio(make_raw, cleaned):
+    out = cleaned(make_raw({'B25077_001E': 400000, 'B25119_002E': 80000},
+                           {'B25077_001E': 400000, 'B25119_002E': SENT_NA, 'B25119_002M': SENT_NO_MOE}))
+    assert out['value_to_owner_income'].iloc[0] == pytest.approx(5.0)
+    assert pd.isna(out['value_to_owner_income'].iloc[1])
 
 
-def test_value_to_income_compares_values_in_the_same_2024_dollars(make_raw, cleaned):
-    raw = make_raw({'B25077_001E': 300000, 'B19013_001E': 60000})
-    ratio = cleaned(raw, api_year=2014)['value_to_income'].iloc[0]
+def test_the_ratio_divides_by_owner_income_not_all_household_income(make_raw, cleaned):
+    """Home value covers owner-occupied homes only, so the denominator is the income of owner households"""
+    out = cleaned(make_raw({'B25077_001E': 300000, 'B19013_001E': 60000, 'B25119_002E': 75000}))
+    assert out['value_to_owner_income'].iloc[0] == pytest.approx(4.0)   # 300000 / 75000, not 300000 / 60000
+    assert out['income'].iloc[0] == 60000                              # the all-household median is still reported
+
+
+def test_value_to_owner_income_compares_values_in_the_same_2024_dollars(make_raw, cleaned):
+    raw = make_raw({'B25077_001E': 300000, 'B25119_002E': 60000})
+    ratio = cleaned(raw, api_year=2014)['value_to_owner_income'].iloc[0]
     expected = (300000 * cfg.home_value_factor(2014)) / (60000 * cfg.DOLLAR_FACTORS_TO_2024[2014])
     assert ratio == pytest.approx(expected)
     assert ratio > 5.0  # the early home value is converted with a larger factor than income, so the ratio is above the raw 5.0
+
+
+def test_the_lowest_and_highest_open_ended_intervals_are_told_apart(make_raw, cleaned):
+    out = cleaned(make_raw({'B25119_002E': 2499, 'B25119_002M': SENT_TOP},
+                           {'B25119_002E': 250001, 'B25119_002M': SENT_TOP},
+                           {'B25119_002E': 90000, 'B25119_002M': 900}))
+    assert out['owner_income_open_end'].iloc[0] == 'below'
+    assert out['owner_income_open_end'].iloc[1] == 'above'
+    assert pd.isna(out['owner_income_open_end'].iloc[2])
+    assert (out['owner_income_band'].iloc[:2] == 'top_coded').all()
+
+
+def test_bottom_coded_counts_are_logged(make_raw):
+    raw = make_raw({'B25119_002E': 2499, 'B25119_002M': SENT_TOP}, {'B25119_002E': 250001, 'B25119_002M': SENT_TOP})
+    _, log = clean.clean_dataset(raw, 2024, 'tract', '2020-2024')
+    assert log['owner_income']['top_coded'] == 2 and log['owner_income']['of_which_bottom_coded'] == 1
 
 
 def test_proportion_moe_matches_a_hand_calculation():

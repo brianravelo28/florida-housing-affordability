@@ -4,6 +4,7 @@
     "home_value": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 1,
       "band_moderate": 0,
@@ -12,6 +13,7 @@
     "rent": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 1,
       "band_moderate": 0,
@@ -20,6 +22,16 @@
     "income": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "owner_income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 1,
       "band_moderate": 0,
@@ -48,7 +60,7 @@
       "band_moderate": 0,
       "band_low": 0
     },
-    "value_to_income": {
+    "value_to_owner_income": {
       "computed": 1,
       "not_computed": 0
     }
@@ -58,6 +70,7 @@
     "home_value": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 65,
       "band_moderate": 2,
@@ -66,6 +79,7 @@
     "rent": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 65,
       "band_moderate": 2,
@@ -74,9 +88,19 @@
     "income": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 67,
       "band_moderate": 0,
+      "band_low": 0
+    },
+    "owner_income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "of_which_bottom_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 65,
+      "band_moderate": 2,
       "band_low": 0
     },
     "housing_units": {
@@ -102,7 +126,7 @@
       "band_moderate": 7,
       "band_low": 1
     },
-    "value_to_income": {
+    "value_to_owner_income": {
       "computed": 67,
       "not_computed": 0
     }
@@ -112,6 +136,7 @@
     "home_value": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 1,
       "band_moderate": 0,
@@ -120,6 +145,7 @@
     "rent": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 1,
       "band_moderate": 0,
@@ -128,6 +154,16 @@
     "income": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "owner_income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 1,
       "band_moderate": 0,
@@ -156,7 +192,7 @@
       "band_moderate": 0,
       "band_low": 0
     },
-    "value_to_income": {
+    "value_to_owner_income": {
       "computed": 1,
       "not_computed": 0
     }
@@ -166,6 +202,7 @@
     "home_value": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 65,
       "band_moderate": 2,
@@ -174,6 +211,7 @@
     "rent": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 66,
       "band_moderate": 1,
@@ -182,6 +220,16 @@
     "income": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 67,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "owner_income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 67,
       "band_moderate": 0,
@@ -210,7 +258,7 @@
       "band_moderate": 8,
       "band_low": 0
     },
-    "value_to_income": {
+    "value_to_owner_income": {
       "computed": 67,
       "not_computed": 0
     }
@@ -220,6 +268,7 @@
     "home_value": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 1,
       "band_moderate": 0,
@@ -228,6 +277,7 @@
     "rent": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 1,
       "band_moderate": 0,
@@ -236,6 +286,16 @@
     "income": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 1,
+      "band_moderate": 0,
+      "band_low": 0
+    },
+    "owner_income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 1,
       "band_moderate": 0,
@@ -264,7 +324,7 @@
       "band_moderate": 0,
       "band_low": 0
     },
-    "value_to_income": {
+    "value_to_owner_income": {
       "computed": 1,
       "not_computed": 0
     }
@@ -274,6 +334,7 @@
     "home_value": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 66,
       "band_moderate": 1,
@@ -282,6 +343,7 @@
     "rent": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 63,
       "band_moderate": 4,
@@ -290,9 +352,19 @@
     "income": {
       "no_estimate": 0,
       "top_coded": 0,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 66,
       "band_moderate": 1,
+      "band_low": 0
+    },
+    "owner_income": {
+      "no_estimate": 0,
+      "top_coded": 0,
+      "of_which_bottom_coded": 0,
+      "estimate_without_margin": 0,
+      "band_high": 67,
+      "band_moderate": 0,
       "band_low": 0
     },
     "housing_units": {
@@ -318,7 +390,7 @@
       "band_moderate": 16,
       "band_low": 0
     },
-    "value_to_income": {
+    "value_to_owner_income": {
       "computed": 67,
       "not_computed": 0
     }
@@ -328,6 +400,7 @@
     "home_value": {
       "no_estimate": 190,
       "top_coded": 22,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 3690,
       "band_moderate": 1162,
@@ -336,6 +409,7 @@
     "rent": {
       "no_estimate": 397,
       "top_coded": 93,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 3259,
       "band_moderate": 1262,
@@ -344,10 +418,20 @@
     "income": {
       "no_estimate": 110,
       "top_coded": 9,
+      "of_which_bottom_coded": 0,
       "estimate_without_margin": 0,
       "band_high": 2051,
       "band_moderate": 2911,
       "band_low": 79
+    },
+    "owner_income": {
+      "no_estimate": 260,
+      "top_coded": 24,
+      "of_which_bottom_coded": 2,
+      "estimate_without_margin": 0,
+      "band_high": 1729,
+      "band_moderate": 2918,
+      "band_low": 229
     },
     "housing_units": {
       "special_estimates": 0,
@@ -372,9 +456,9 @@
       "band_moderate": 3500,
       "band_low": 1138
     },
-    "value_to_income": {
-      "computed": 4933,
-      "not_computed": 227
+    "value_to_owner_income": {
+      "computed": 4823,
+      "not_computed": 337
     }
   }
 }

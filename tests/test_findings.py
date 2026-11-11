@@ -37,10 +37,10 @@ def test_readme_contains_every_number_the_findings_produce(computed):
 
 
 def test_findings_are_internally_consistent(computed):
-    assert computed['home_value_growth_pct'] > computed['income_growth_pct']
+    assert computed['home_value_growth_pct'] > computed['owner_income_growth_pct']
     assert computed['counties_with_ratio'] == 67
     assert computed['tracts_with_ratio'] <= computed['tracts_total'] == 5160
-    assert computed['tracts_ratio_5x_pct'] >= computed['tracts_ratio_8x_pct']
+    assert computed['tracts_ratio_5x_pct'] >= computed['tracts_ratio_6x_pct']
     ratios = [computed[f'top_ratio_{i}'] for i in range(1, findings.RANK_COUNT + 1)]
     assert ratios == sorted(ratios, reverse=True)
 

@@ -25,7 +25,8 @@ def test_methodology_tract_table_matches_the_cleaning_log():
     doc, tracts = read('docs', 'METHODOLOGY.md'), log()['2020-2024 tracts']
     rows = {
         'Median home value': tracts['home_value'], 'Median gross rent': tracts['rent'],
-        'Median household income': tracts['income'], 'Renters paying 30%+ of income': tracts['renters_30plus_share'],
+        'Median household income': tracts['income'], 'Median owner-household income': tracts['owner_income'],
+        'Renters paying 30%+ of income': tracts['renters_30plus_share'],
     }
     for label, counts in rows.items():
         expected = [counts['no_estimate'], counts.get('top_coded', 0), counts['band_high'],
@@ -41,15 +42,25 @@ def test_methodology_county_table_matches_the_cleaning_log():
         counties = data[f'{period} counties']
         expected = ' | '.join(
             ' / '.join(str(counties[m][f'band_{b}']) for b in ('high', 'moderate', 'low'))
-            for m in ('home_value', 'rent', 'income', 'renters_30plus_share'))
+            for m in ('home_value', 'rent', 'income', 'owner_income', 'renters_30plus_share'))
         line = next(l for l in doc.splitlines() if l.startswith(f'| {period} | ') and ' / ' in l)
         assert ' | '.join(c.strip() for c in line.strip('|').split('|')[1:]) == expected
 
 
 def test_methodology_ratio_and_shape_counts_match():
     doc, tracts = read('docs', 'METHODOLOGY.md'), log()['2020-2024 tracts']
-    assert f"{tracts['value_to_income']['computed']:,} tracts have both medians" in doc
+    assert f"{tracts['value_to_owner_income']['computed']:,} tracts have both medians" in doc
     assert f"{tracts['renters_30plus_share']['share_is_zero']} tracts have an estimated share of exactly 0%" in doc
+
+
+def test_methodology_quotes_the_ratio_counts_and_the_all_households_sensitivity():
+    import findings
+    doc = re.sub(r'\s+', ' ', read('docs', 'METHODOLOGY.md'))  # ignore line breaks in the page
+    f = findings.compute(*findings.read_tables())
+    assert f"{f['tracts_with_ratio']:,} have both medians at moderate or high reliability" in doc
+    sens = ", ".join(f"{f[f'ratio_all_households_{t}']:.1f}" for t in ('first', 'mid', 'last'))
+    own = ", ".join(f"{f[f'ratio_{t}']:.1f}" for t in ('first', 'mid', 'last'))
+    assert f"{sens}" in doc and f"{own}" in doc
 
 
 def test_the_census_notice_is_on_every_surface_that_needs_it():

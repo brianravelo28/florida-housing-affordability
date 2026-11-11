@@ -4,76 +4,76 @@
     "api_year": 2014,
     "geography": "state",
     "endpoint": "https://api.census.gov/data/2014/acs/acs5",
-    "variables": 26,
+    "variables": 28,
     "rows": 1,
-    "retrieved_at_utc": "2026-11-04T04:14:57Z",
+    "retrieved_at_utc": "2026-11-11T00:49:04Z",
     "raw_file": "data/raw/state_2014.json",
-    "sha256": "2b48d96eb6349ed56b9be22148f8075240ded3a60aca9066b74927100834a071"
+    "sha256": "e54cf2b99ddfbefd11004122abbc03a4f5f67bd8c5e236700e844af8975b8c23"
   },
   {
     "period": "2010-2014",
     "api_year": 2014,
     "geography": "county",
     "endpoint": "https://api.census.gov/data/2014/acs/acs5",
-    "variables": 26,
+    "variables": 28,
     "rows": 67,
-    "retrieved_at_utc": "2026-11-04T04:14:58Z",
+    "retrieved_at_utc": "2026-11-11T00:49:05Z",
     "raw_file": "data/raw/county_2014.json",
-    "sha256": "80d918030dc657fd59742f699931c939f570554f983caefbab5107d9ce34bf35"
+    "sha256": "d6f31c8afdcfedeb38b3c0eba66aac8ce7da3d931c0e6a235988f065b7c44d41"
   },
   {
     "period": "2015-2019",
     "api_year": 2019,
     "geography": "state",
     "endpoint": "https://api.census.gov/data/2019/acs/acs5",
-    "variables": 26,
+    "variables": 28,
     "rows": 1,
-    "retrieved_at_utc": "2026-11-04T04:14:58Z",
+    "retrieved_at_utc": "2026-11-11T00:49:06Z",
     "raw_file": "data/raw/state_2019.json",
-    "sha256": "750faffd88cbaa5e3d8b43a5d1c2d66143598ebffa4ae7e4620f5e90b95be52e"
+    "sha256": "e71d6f11dcfeace990ea04731063ac3157de7900216f26862b7811cc7cf2bcde"
   },
   {
     "period": "2015-2019",
     "api_year": 2019,
     "geography": "county",
     "endpoint": "https://api.census.gov/data/2019/acs/acs5",
-    "variables": 26,
+    "variables": 28,
     "rows": 67,
-    "retrieved_at_utc": "2026-11-04T04:14:59Z",
+    "retrieved_at_utc": "2026-11-11T00:49:07Z",
     "raw_file": "data/raw/county_2019.json",
-    "sha256": "ae465beff16e844d986eb949512b9853030c170f7d1b7a58d8c154c0e971da51"
+    "sha256": "5573e2c86d4e78c7203283184caa552a0ca5698c1fbcb00d53c3191f3a04d8aa"
   },
   {
     "period": "2020-2024",
     "api_year": 2024,
     "geography": "state",
     "endpoint": "https://api.census.gov/data/2024/acs/acs5",
-    "variables": 26,
+    "variables": 28,
     "rows": 1,
-    "retrieved_at_utc": "2026-11-04T04:15:00Z",
+    "retrieved_at_utc": "2026-11-11T00:49:08Z",
     "raw_file": "data/raw/state_2024.json",
-    "sha256": "ce030da49767d25840ec06cbee3476badb4ec9105661f60dfda056c310e1b889"
+    "sha256": "bafa6afb485e01004a60bd83cc8d86286a5c7661307384a88babdbfff0dac9c9"
   },
   {
     "period": "2020-2024",
     "api_year": 2024,
     "geography": "county",
     "endpoint": "https://api.census.gov/data/2024/acs/acs5",
-    "variables": 26,
+    "variables": 28,
     "rows": 67,
-    "retrieved_at_utc": "2026-11-04T04:15:01Z",
+    "retrieved_at_utc": "2026-11-11T00:49:09Z",
     "raw_file": "data/raw/county_2024.json",
-    "sha256": "84ce6b02327f9e1a3b487f84e90a92153fe9c9858e2aad730a62a342eb4a9830"
+    "sha256": "04ab7eb99b0f470d18fd001e7921251f948f6ac9602d34c7ab9ff5b1d8ba1de7"
   },
   {
     "period": "2020-2024",
     "api_year": 2024,
     "geography": "tract",
     "endpoint": "https://api.census.gov/data/2024/acs/acs5",
-    "variables": 26,
+    "variables": 28,
     "rows": 5160,
-    "retrieved_at_utc": "2026-11-04T04:15:04Z",
+    "retrieved_at_utc": "2026-11-11T00:49:13Z",
     "raw_file": "data/raw/tract_2024.json",
-    "sha256": "3702b097aaeb91b01f11997f048800956f7844980d37f9692e437e87c1ed3401"
+    "sha256": "cb9b5b52eec8ada1f1f8ae3477dcc9455ce3e89a98d7fda4fec65eae5d3e9156"
   }
 ]

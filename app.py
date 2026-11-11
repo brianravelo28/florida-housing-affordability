@@ -166,7 +166,7 @@ def reliability_box():
         "- **12% to 40%:** moderate reliability\n"
         "- **Over 40%:** low reliability, drawn in **gray**: the margin of error is then about two-thirds of the estimate "
         "or more, so the true value could be anywhere from about a third of the figure to about 1.7 times it\n\n"
-        "Areas with no estimate, or a top-coded value (the Census Bureau reports only a floor), are gray too. "
+        "Areas with no estimate, or an open-ended value (the Census Bureau reports only a limit), are gray too. "
         "The cutoffs are a convention, not a Census Bureau standard. Each area's band appears when you hover over it.")
 
 
@@ -182,20 +182,21 @@ with tab_map:
     summary = f"{shaded_n:,} {area} shaded"
     if len(gray_counts):
         parts = []
-        labels = {'no_estimate': 'no estimate', 'top_coded': 'top-coded', 'low': 'low reliability',
-                  'no_margin': 'no margin of error', 'component': 'a component is unreliable'}
+        labels = {'no_estimate': 'no estimate', 'top_coded': 'open-ended', 'low': 'low reliability',
+                  'no_margin': 'no margin of error', 'component': 'with a missing or unreliable median'}
         for band, n in gray_counts.items():
             parts.append(f"{n:,} {labels.get(band, band)}")
         summary += f"; {int(gray_counts.sum()):,} gray ({', '.join(parts)})"
     st.markdown(f"**{summary}.**")
     reliability_box()
-    if period != LATEST and spec['col'] in ('home_value', 'value_to_income'):
+    if period != LATEST and spec['col'] in ('home_value', 'value_to_owner_income'):
         st.caption("The Census Bureau did not adjust home values for inflation before its 2018-2022 release, so "
                    f"{period} home values are converted to 2024 dollars with that period's average-year inflation "
                    "factor (accurate to about 1 percentage point).")
     if spec['kind'] == 'ratio':
-        st.caption("This ratio divides one median by another, so it has no margin of error of its own. "
-                   "It is shaded only where both medians are reliable.")
+        st.caption("This ratio divides the median value of owner-occupied homes by the median income of owner households "
+                   "(both cover owners only), so it has no margin of error of its own. It is shaded only where both "
+                   "medians are reliable.")
     with st.expander("View as table"):
         table_view(current.sort_values('name'), spec['kind'], spec['short'])
 
@@ -236,7 +237,7 @@ with tab_about:
     st.markdown(f"""
 - **Source:** the U.S. Census Bureau's American Community Survey (ACS) 5-year estimates, pulled directly from the
   Census Bureau Data API: tables B25077 (median home value), B25064 (median gross rent), B19013 (median household
-  income) and B25070 (rent as a share of income).
+  income), B25119 (median household income of owners) and B25070 (rent as a share of income).
 - **Periods:** {', '.join(PERIODS)}. Each is a five-year window of survey responses, not a single year, and the three
   do not overlap.
 - **Geography:** Florida's {len(county_names)} counties for all three periods; {len(tracts):,} census tracts for {LATEST}
@@ -244,13 +245,20 @@ with tab_about:
 - **Dollars:** every dollar figure is in 2024 dollars. Income and rent are converted with the factors the Census Bureau
   publishes. Home values from the 2010-2014 and 2015-2019 releases were not inflation-adjusted by the Census Bureau, so they
   are converted with each period's average-year factor from the Consumer Price Index (accurate to about 1 percentage point).
-- **Medians and ratios:** each figure is a median. The home value to income ratio divides one median by another; it is a
-  descriptive comparison and has no margin of error of its own.
-- **Renter share:** the share of renter households whose rent is 30% or more of income, among households where it can be computed;
-  its margin of error follows the Census Bureau's formula for proportions.
-- **Reliability:** see the box under the map. Gray areas have no estimate or low reliability.
+- **Home value:** the owner's own estimate of what the home would sell for, not a sale price, for owner-occupied homes only.
+- **Gross rent:** the contract rent plus the estimated monthly cost of utilities and fuels that the renter pays.
+- **Household income:** the income of the householder and everyone else in the household aged 15 or older over the past 12 months.
+  "Owner income" is the same measure for households that own their home.
+- **Home value to owner income ratio:** median home value divided by the median income of owner households, because home value
+  covers owner-occupied homes only. It divides one median by another, so it is a descriptive comparison with no margin of error of
+  its own.
+- **Renter share:** the share of renter households whose gross rent is 30% or more of their income, among renter households where
+  it can be computed (not computed: no rent paid, or no income or a net loss); its margin of error follows the Census Bureau's
+  formula for proportions.
+- **Reliability:** see the box under the map. Gray areas have no estimate, an open-ended value or low reliability.
 - **What it shows:** how housing costs and incomes compare across places and time. It describes where costs are high relative to
-  incomes; it does not explain why.
+  incomes; it does not explain why. Every term is defined in the
+  [methodology](https://github.com/brianravelo28/florida-housing-affordability/blob/main/docs/METHODOLOGY.md#terms).
 """)
     st.markdown("[Code and methodology on GitHub](https://github.com/brianravelo28/florida-housing-affordability)")
 

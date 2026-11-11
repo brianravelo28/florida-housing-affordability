@@ -3,12 +3,34 @@
 How the data was pulled, cleaned and scored, and what the numbers can and cannot say. Every count below comes from
 `data/processed/cleaning_log.json`, which `python run_pipeline.py` writes; a test checks that this page matches it.
 
+Contents: [Terms](#terms) · [Source and periods](#source-and-periods) · [What is pulled](#what-is-pulled) · [Cleaning rules](#cleaning-rules) · [Reliability](#reliability) · [Dollars](#dollars) · [Derived measures](#derived-measures) · [Boundaries](#boundaries) · [Checks](#checks) · [Limits](#limits)
+
+## Terms
+
+| Term | Meaning |
+|------|---------|
+| ACS 5-year estimate | An estimate from the Census Bureau's American Community Survey that pools five years of survey responses. It describes a period, not a single year. |
+| Period | A non-overlapping five-year window: 2010-2014, 2015-2019 or 2020-2024. |
+| Margin of error | The Census Bureau's margin around an estimate, at 90% confidence. |
+| Coefficient of variation (CV) | The margin of error divided by 1.645, then divided by the estimate (see [Reliability](#reliability)). |
+| Reliability band | High (CV under 12%), moderate (12% to 40%) or low (over 40%); the source of the cutoffs is in [Reliability](#reliability). |
+| Gray area | An area the map does not shade: no estimate, an open-ended value, or low reliability. |
+| Median home value | The middle value of owner-occupied homes (table B25077). Each value is the owner's own answer to how much the home (house and lot, apartment or mobile home) would sell for if it were for sale. It is the owner's estimate, not a sale price, and it covers only homes that their owners live in. |
+| Median gross rent | The middle monthly gross rent of rented homes where rent is paid (B25064). Gross rent is the contract rent plus the estimated monthly cost of the utilities and fuels the renter pays. |
+| Median household income | The middle annual income of all households (B19013), owners and renters together. A household's income is the income of the householder and everyone else in the household aged 15 or older, over the past 12 months, in inflation-adjusted dollars. |
+| Median owner-household income | The same measure for households that own their home (B25119, median household income by tenure). |
+| Home value to owner income ratio | Median home value divided by median owner-household income. Both cover owner households only. |
+| Gross rent as a percentage of household income | For each renter household, its monthly gross rent divided by its monthly income (B25070). It is not computed for households that pay no rent or that report no income or a net loss. |
+| Renters paying 30% or more | Renter households whose gross rent is 30% or more of their income, as a share of the renter households where the percentage can be computed. |
+| Open-ended value | A median in the lowest or highest interval of the Census Bureau's range, so only the limit is reported (for example "250,000+" for income and "2,000,000+" for home value; the lowest income interval is "2,500-"). Also called top-coded or bottom-coded. |
+| 2024 dollars | Dollar figures adjusted for inflation to 2024 (see [Dollars](#dollars)). |
+| Census tract | A neighborhood-sized area drawn by the Census Bureau; Florida has 5,160 in the 2020 boundaries. |
+
 ## Source and periods
 
 All data comes from the U.S. Census Bureau's American Community Survey (ACS) 5-year estimates, pulled directly from the
-Census Bureau Data API (details in [CITATIONS.md](CITATIONS.md)). An ACS 5-year estimate pools five years of survey responses,
-so each figure describes a period, not a single year. The three periods used do not overlap, which is what the Census Bureau
-advises for comparisons.
+Census Bureau Data API (details in [CITATIONS.md](CITATIONS.md)). The three periods do not overlap, which is what the Census
+Bureau advises for comparisons.
 
 | Period | API release year | Tract boundaries |
 |--------|------------------|------------------|
@@ -27,6 +49,7 @@ the tract map covers 2020-2024 only.
 | Median home value | B25077 | Estimate and margin of error |
 | Median gross rent | B25064 | Estimate and margin of error |
 | Median household income | B19013 | Estimate and margin of error |
+| Median owner-household income | B25119 (owner occupied) | Estimate and margin of error; the denominator of the home value ratio |
 | Rent as a percentage of income | B25070 (total, 30%+ bins, not computed) | Share of renters paying 30% or more |
 | Housing units, households, owner and renter households | B25001, B25003 | Counts for context and add-up checks |
 
@@ -38,38 +61,42 @@ Each pull records the endpoint, row count, retrieval time and a checksum of the 
 Each rule is counted. The tract table is the one that needs them; the 67 counties and the state have no special values.
 
 **1. Special values become missing.** The API returns large negative numbers where there is no usable value:
--666666666 (estimate not available), -222222222 (margin of error not available) and -333333333 (margin not applicable because
-the median is at the top of the open-ended range). They are converted to missing values and never enter a median, ratio or color.
+-666666666 (the estimate could not be computed), -222222222 (the margin of error could not be computed) and -333333333 (the
+margin of error could not be computed because the median falls in the lowest or highest interval of an open-ended range). They are
+converted to missing values and never enter a median, ratio or color.
 
-**2. Top-coded medians are flagged.** When the margin is -333333333 the estimate is only the Census cap (for example
-$2,000,001 for home value), so the value is left out and the cap is kept in its own column.
+**2. Open-ended medians are flagged.** When the margin is -333333333 the reported estimate is only the limit of the open-ended
+interval (for example $2,000,001 for home value, or $2,499 for the lowest income interval), so the value is left out. The limit is
+kept in its own column, with whether it is a top or a bottom limit.
 
 **3. Reliability bands** (next section) are assigned to every estimate.
 
 **4. Dollars** are converted to 2024 dollars (see Dollars).
 
-**5. Derived measures** are the home value to income ratio and the renter share (see Derived measures).
+**5. Derived measures** are the home value to owner income ratio and the renter share (see Derived measures).
 
 Tracts, 2020-2024 (5,160 tracts):
 
-| Measure | No estimate | Top-coded | High | Moderate | Low |
-|---------|-------------|-----------|------|----------|-----|
+| Measure | No estimate | Open-ended | High | Moderate | Low |
+|---------|-------------|------------|------|----------|-----|
 | Median home value | 190 | 22 | 3,690 | 1,162 | 96 |
 | Median gross rent | 397 | 93 | 3,259 | 1,262 | 149 |
 | Median household income | 110 | 9 | 2,051 | 2,911 | 79 |
+| Median owner-household income | 260 | 24 | 1,729 | 2,918 | 229 |
 | Renters paying 30%+ of income | 114 | 0 | 319 | 3,500 | 1,138 |
 
-For the renter share, 89 tracts have an estimated share of exactly 0%; their reliability is not defined, so they are shaded.
-Home value to income ratio: 4,933 tracts have both medians, and 4,771 have both medians at moderate or high reliability, which
-is what the map shades.
+Two of the 24 open-ended owner-income tracts are bottom-coded (the median is in the lowest interval); every other open-ended
+median is top-coded. For the renter share, 89 tracts have an estimated share of exactly 0%; their reliability is not defined, so they
+are shaded. Home value to owner income ratio: 4,823 tracts have both medians, and 4,532 have both medians at moderate or high
+reliability, which is what the map shades.
 
 Counties: every county has an estimate in every period. Reliability ratings (high / moderate / low):
 
-| Period | Home value | Rent | Income | Renter share |
-|--------|------------|------|--------|--------------|
-| 2010-2014 | 65 / 2 / 0 | 65 / 2 / 0 | 67 / 0 / 0 | 59 / 7 / 1 |
-| 2015-2019 | 65 / 2 / 0 | 66 / 1 / 0 | 67 / 0 / 0 | 59 / 8 / 0 |
-| 2020-2024 | 66 / 1 / 0 | 63 / 4 / 0 | 66 / 1 / 0 | 51 / 16 / 0 |
+| Period | Home value | Rent | Income | Owner income | Renter share |
+|--------|------------|------|--------|--------------|--------------|
+| 2010-2014 | 65 / 2 / 0 | 65 / 2 / 0 | 67 / 0 / 0 | 65 / 2 / 0 | 59 / 7 / 1 |
+| 2015-2019 | 65 / 2 / 0 | 66 / 1 / 0 | 67 / 0 / 0 | 67 / 0 / 0 | 59 / 8 / 0 |
+| 2020-2024 | 66 / 1 / 0 | 63 / 4 / 0 | 66 / 1 / 0 | 67 / 0 / 0 | 51 / 16 / 0 |
 
 ## Reliability
 
@@ -90,7 +117,7 @@ ACS Data Reliability") applies three bands that, in its words, a 2014 report fro
 The 12% and 40% cutoffs are therefore an Esri guideline that the Census Bureau quotes, a convention and not a Census Bureau
 standard. At a CV of 40% the 90% margin of error is 1.645 x 0.40, about 66% of the estimate, so the true value could plausibly be
 anywhere from about a third of the figure to about 1.7 times it; the map does not shade an estimate that uncertain. Areas with no
-estimate, or a top-coded median, are also gray. The same rule is applied to every measure so the maps are comparable. Each area's
+estimate, or an open-ended median, are also gray. The same rule is applied to every measure so the maps are comparable. Each area's
 rating appears in the hover text and in the table views.
 
 ## Dollars
@@ -115,9 +142,12 @@ The as-published values are kept in the data (the `*_as_published` columns) so e
 
 ## Derived measures
 
-- **Home value to income ratio:** median home value (owner-occupied homes) divided by median household income. It compares two
-  medians for the same area and period, so it has no margin of error of its own; the map shades it only where both medians are
-  reliable. It describes places, not the situation of any one household.
+- **Home value to owner income ratio:** median home value divided by median owner-household income. Home value covers
+  owner-occupied homes only, so the denominator is the income of owner households, not of all households: owners earn more than
+  renters, and dividing by all households would compare two different groups. With the median income of all households the ratio
+  would be 3.4, 4.0, 4.8 for the three periods instead of 2.8, 3.3, 4.1. It compares two medians for the same area and period, so
+  it has no margin of error of its own; the map shades it only where both medians are reliable. It describes places, not the
+  situation of any one household.
 - **Renters paying 30% or more of income on rent:** the four 30%+ bins of table B25070 divided by renter households with rent
   computed (the total minus "not computed"). The margin of error follows the Census Bureau's formula for a proportion whose numerator is
   part of its denominator, falling back to its ratio formula when the term under the root is negative.
@@ -134,13 +164,13 @@ no housing units and no estimates, and the pipeline fails if a tract with housin
 - No special value survives in any output file.
 - Three counties (Miami-Dade, Monroe, Alachua) were checked for home value, rent and income in two periods (2015-2019 and 2020-2024)
   against the Census Bureau's separate Data Profile tables (DP04 and DP03): all 18 values match the as-published figures.
-- Offline tests cover each rule: special values, top-coding, reliability bands at their edges, dollar conversion, the margin-of-error
-  formula, the add-up checks, and which areas the map shades or grays.
+- Offline tests cover each rule: special values, open-ended values (top and bottom), reliability bands at their edges, dollar
+  conversion, the margin-of-error formula, the add-up checks, which denominator the ratio uses, and which areas the map shades or grays.
 
 ## Limits
 
 - Every figure is a survey estimate. Small areas have wide margins, which is why the dashboard shows the margin and a rating for each.
 - A median describes the middle household or home, not the spread.
 - ACS periods pool five years, so a figure is not a snapshot of one year, and the overlap rules mean only non-overlapping periods are compared.
-- The Census Bureau reports a floor instead of a value for the highest-valued tracts (top-coding), so those are gray.
+- The Census Bureau reports only a limit for medians in the open-ended intervals (for example the highest-valued tracts), so those are gray.
 - Patterns show where and when costs differ; they do not show why.

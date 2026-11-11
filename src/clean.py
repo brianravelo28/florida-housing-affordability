@@ -4,13 +4,15 @@ Clean the raw ACS responses into the tables the dashboard reads.
 Rules (each one is counted; the counts are written to data/processed/cleaning_log.json):
   1. The API's large negative "special values" become missing values, never numbers.
   2. A median whose margin of error is -333333333 is top-coded (the estimate is only the cap), so it is
-     flagged and left out of medians and map colors; the cap is kept in its own column.
+     flagged and left out of medians and map colors; the limit value is kept in its own column, with
+     whether it is a top or a bottom limit.
   3. Reliability: CV = (margin of error / 1.645) / estimate, banded high (<12%), moderate (12-40%),
      low (>40%) using the bands an Esri report proposes and the Census Bureau's rural-users handbook quotes.
   4. Dollar figures are converted to 2024 dollars. Income and rent use the factors the Census Bureau publishes
      (it adjusts them to each period's final year). Home values from the 2010-2014 and 2015-2019 releases, which
      Census did not adjust, use the average-year CPI-U factor (see acs_config.home_value_factor).
-  5. Derived measures: value-to-income ratio (a ratio of two medians, descriptive, no margin of error) and the share
+  5. Derived measures: home value to owner-household income ratio (a ratio of two medians, descriptive, no margin
+     of error) and the share
      of renter households paying 30% or more of income on rent, with a margin of error from the Census
      formulas for proportions.
 """
@@ -88,6 +90,10 @@ def clean_median(df, name, base, api_year, log):
     out[name] = dollars_to_2024(published, api_year, factor)
     out[name + '_moe'] = dollars_to_2024(margin, api_year, factor)
     out[name + '_top_code_published'] = est.where(top_coded)
+    direction = pd.Series(np.nan, index=df.index, dtype='object')
+    direction[top_coded & (est <= cfg.LOW_OPEN_END_MAX)] = 'below'
+    direction[top_coded & (est > cfg.LOW_OPEN_END_MAX)] = 'above'
+    out[name + '_open_end'] = direction
     cv = cv_percent(published, margin)
     out[name + '_cv'] = cv
     reliability = band(cv)
@@ -99,6 +105,7 @@ def clean_median(df, name, base, api_year, log):
     log[name] = {
         'no_estimate': int(no_estimate.sum()),
         'top_coded': int(top_coded.sum()),
+        'of_which_bottom_coded': int((direction == 'below').sum()),
         'estimate_without_margin': int(moe_missing.sum()),
         **{f'band_{b}': int((reliability == b).sum()) for b in BANDS},
     }
@@ -173,9 +180,10 @@ def clean_dataset(raw, api_year, geography, period):
         out = out.join(clean_count(raw, name, base, log))
     out = out.join(rent_burden(raw, log))
 
-    both = out['home_value'].notna() & out['income'].notna()
-    out['value_to_income'] = (out['home_value'] / out['income']).where(both)
-    log['value_to_income'] = {'computed': int(both.sum()), 'not_computed': int((~both).sum())}
+    # Home value covers owner-occupied homes, so it is divided by the income of owner households (not all households)
+    both = out['home_value'].notna() & out['owner_income'].notna()
+    out['value_to_owner_income'] = (out['home_value'] / out['owner_income']).where(both)
+    log['value_to_owner_income'] = {'computed': int(both.sum()), 'not_computed': int((~both).sum())}
     return out.reset_index(drop=True), log
 
 
