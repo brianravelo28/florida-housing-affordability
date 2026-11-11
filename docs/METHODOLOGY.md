@@ -262,7 +262,7 @@ twice and requires identical output, and a third shows that a changed input chan
 
 **Software.** The committed data was built with Python 3.14.7, pandas 3.1.0, NumPy 2.5.4, GeoPandas 1.2.0, pyogrio 0.13.0 and Shapely
 2.2.0 (Plotly 7.1.0, Streamlit 1.66.1, requests 2.34.2 and pytest 9.2.0 for the app and the tests). The requirements files give each
-package a minimum version and a cap at the next major version; `.python-version` sets Python 3.14.3 for the host.
+package a minimum version and a cap at the next major version; `.python-version` sets Python 3.14.3 for the host. The host and the GitHub Actions run install the newest allowed versions (pandas 3.1.1 and Streamlit 1.67.0 on the host); the tests pass on them.
 
 **Tests.** `python -m pytest` runs offline with small hand-built data and the committed files; the app tests take most of its
 roughly 75 seconds. They cover the cleaning rules, the dollar conversion and its check, the reliability bands, the margin formulas, the
@@ -276,3 +276,9 @@ start command `streamlit run app.py --server.port $PORT --server.address 0.0.0.0
 `data/processed/`; no API key is needed to run it. Streamlit's built-in health check is `/_stcore/health` (set it as the service's
 health check path in the Render dashboard, which overrides the reference config). A free service sleeps after about 15 minutes idle, and
 the first request afterward takes about 20 to 30 seconds.
+
+**Hosted figures** (read from the sidebar's "About this deployment" panel on 2026-11-11). The deployed commit was `b86a9e2`, running
+Python 3.14.3 with pandas 3.1.1, NumPy 2.5.4, Plotly 7.1.0 and Streamlit 1.67.0. The app process used about 213 MB on a fresh start,
+and about 335 to 400 MB after the counties map and all five tract measures had been drawn in several sessions, against the free
+plan's limit of 512 MB per instance ([Render compute plans](https://render.com/docs/compute-plans)). Streamlit's cache keeps each map
+it has drawn, so memory grows with the number of distinct views until the process restarts.
