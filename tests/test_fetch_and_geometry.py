@@ -73,9 +73,18 @@ def test_request_asks_for_every_variable_and_the_right_geography():
 
 
 def test_request_retries_then_succeeds():
-    session = FakeSession([FakeResponse(500, text='oops'), FakeResponse(200, [['NAME']])])
-    assert fetch_acs.request_rows(2014, 'county', KEY, session=session) == [['NAME']]
+    session = FakeSession([FakeResponse(500, text='oops'), FakeResponse(200, [['NAME'], ['x']])])
+    assert fetch_acs.request_rows(2014, 'county', KEY, session=session) == [['NAME'], ['x']]
     assert len(session.calls) == 2
+
+
+def test_a_successful_response_with_no_data_rows_is_a_failure():
+    """The API can answer 200 and return only the header (or an empty body); that must not pass as data"""
+    for body in ([['NAME']], [], {'error': 'nothing'}):
+        session = FakeSession([FakeResponse(200, body)] * 3)
+        with pytest.raises(RuntimeError) as failed:
+            fetch_acs.request_rows(2014, 'county', KEY, session=session)
+        assert 'no data rows' in str(failed.value)
 
 
 def test_failed_request_raises_without_leaking_the_key():

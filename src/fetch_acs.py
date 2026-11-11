@@ -68,8 +68,12 @@ def request_rows(api_year, geography, key, session=None, retries=3):
         try:
             response = session.get(endpoint(api_year), params=params, timeout=120)
             if response.status_code == 200:
-                return response.json()
-            last = f"HTTP {response.status_code}: {scrub(response.text[:200], key)}"
+                rows = response.json()
+                if isinstance(rows, list) and len(rows) > 1:
+                    return rows
+                last = "HTTP 200 but no data rows"  # a request can report success and return nothing
+            else:
+                last = f"HTTP {response.status_code}: {scrub(response.text[:200], key)}"
         except requests.RequestException as e:
             last = scrub(str(e), key)
         time.sleep(2 * (attempt + 1))

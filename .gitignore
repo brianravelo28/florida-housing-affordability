@@ -10,17 +10,14 @@ __pycache__/
 venv/
 .pytest_cache/
 
-# Raw API responses are rebuilt by the pipeline
-data/raw/
+# Downloaded boundary files are re-fetched by the pipeline (the raw API responses in data/raw/ are committed)
+data/raw/boundaries/
 
 # OS / editor
 .DS_Store
 Thumbs.db
 .vscode/
 .idea/
-
-# Local-only notes (never pushed)
-notes/
 
 # Local assistant settings
 .claude/
