@@ -277,8 +277,8 @@ start command `streamlit run app.py --server.port $PORT --server.address 0.0.0.0
 health check path in the Render dashboard, which overrides the reference config). A free service sleeps after about 15 minutes idle, and
 the first request afterward takes about 20 to 30 seconds.
 
-**Hosted figures** (read from the sidebar's "About this deployment" panel on 2026-11-11). The deployed commit was `b86a9e2`, running
-Python 3.14.3 with pandas 3.1.1, NumPy 2.5.4, Plotly 7.1.0 and Streamlit 1.67.0. The app process used about 213 MB on a fresh start,
-and about 335 to 400 MB after the counties map and all five tract measures had been drawn in several sessions, against the free
-plan's limit of 512 MB per instance ([Render compute plans](https://render.com/docs/compute-plans)). Streamlit's cache keeps each map
-it has drawn, so memory grows with the number of distinct views until the process restarts.
+**Hosted figures** (read from the sidebar's "About this deployment" panel on 2026-11-11, commit `f900d83`). The host runs Python 3.14.3
+with pandas 3.1.1, NumPy 2.5.4, Plotly 7.1.0 and Streamlit 1.67.0. The app keeps at most 8 drawn maps in its cache
+(`MAX_CACHED_MAPS`; a tract map is about 3.7 MB pickled), so memory levels off: the process used about 212 MB on a fresh start, about
+335 MB after the five tract measures had been drawn, and peaked at about 364 MB after 15 distinct maps (the five tract measures and ten
+county zooms), against the free plan's limit of 512 MB per instance ([Render compute plans](https://render.com/docs/compute-plans)).

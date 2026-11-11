@@ -22,4 +22,4 @@ If a deploy shows an old version, use Manual Deploy > Clear build cache & deploy
 Streamlit serves its own health endpoint at `/_stcore/health` (it returns `ok`). `render.yaml` sets it as the health check path; a
 service created by hand needs the same path in its Render settings. The sidebar's **About this deployment** panel shows the deployed
 commit (from Render's `RENDER_GIT_COMMIT`), the Python and library versions, and the memory the app process is using, so the hosted
-figure can be read from the live app after a deploy.
+figure can be read from the live app after a deploy. The app caches at most 8 drawn maps, which keeps memory well under the free plan's 512 MB.
