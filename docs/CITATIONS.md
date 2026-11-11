@@ -10,7 +10,7 @@
 | Tables | B25077 median value; B25064 median gross rent; B19013 median household income; B25070 gross rent as a percentage of household income; B25001 housing units; B25003 tenure |
 | Geographies | State (Florida, FIPS 12), 67 counties for all three periods, census tracts for 2020-2024 |
 | Retrieved | 2026-11-04 (UTC); exact times and checksums in `data/manifest.json` |
-| Cross-check | ACS Data Profile tables DP04 (home value, gross rent) and DP03 (household income), same API |
+| Cross-checks | ACS Data Profile tables DP04 (home value, gross rent) and DP03 (household income), same API (`data/processed/profile_crosscheck.csv`); ACS 1-year Florida median home value 2010-2019 (`acs/acs1`, B25077; `data/home_value_1year_medians.csv`, with retrieval time) for the home value conversion check |
 
 Suggested citation: U.S. Census Bureau, American Community Survey 5-Year Estimates, tables B25077, B25064, B19013, B25070,
 B25001 and B25003, retrieved through the Census Bureau Data API.

@@ -192,7 +192,7 @@ with tab_map:
     if period != LATEST and spec['col'] in ('home_value', 'value_to_owner_income'):
         st.caption("The Census Bureau did not adjust home values for inflation before its 2018-2022 release, so "
                    f"{period} home values are converted to 2024 dollars with that period's average-year inflation "
-                   "factor (accurate to about 1 percentage point).")
+                   "factor (checked against a second method, within about 1% in value).")
     if spec['kind'] == 'ratio':
         st.caption("This ratio divides the median value of owner-occupied homes by the median income of owner households "
                    "(both cover owners only), so it has no margin of error of its own. It is shaded only where both "
@@ -244,7 +244,7 @@ with tab_about:
   (tracts were redrawn for the 2020 census, so tracts are shown for the latest period only). Water-only areas have no estimate.
 - **Dollars:** every dollar figure is in 2024 dollars. Income and rent are converted with the factors the Census Bureau
   publishes. Home values from the 2010-2014 and 2015-2019 releases were not inflation-adjusted by the Census Bureau, so they
-  are converted with each period's average-year factor from the Consumer Price Index (accurate to about 1 percentage point).
+  are converted with each period's average-year factor from the Consumer Price Index (checked against a second method, within about 1% in value; see the methodology).
 - **Home value:** the owner's own estimate of what the home would sell for, not a sale price, for owner-occupied homes only.
 - **Gross rent:** the contract rent plus the estimated monthly cost of utilities and fuels that the renter pays.
 - **Household income:** the income of the householder and everyone else in the household aged 15 or older over the past 12 months.

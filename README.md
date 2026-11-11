@@ -23,7 +23,7 @@ Between 2010-2014 and 2020-2024, in 2024 dollars:
 - **The ratio varies widely by county.** In 2020-2024 the home value to owner income ratio is highest in Monroe (7.2) and Collier (5.2) counties, each clearly above every other county. Miami-Dade (4.9), Walton (4.8) and Sumter (4.7) follow, within each other's margins of error. It is lowest, about 2.0 to 2.1, in Liberty, Madison and Taylor counties, which cannot be told apart from each other. It rose in 63 of 67 counties over the period, by more than the margin of error in 53 of them; in the other four it fell, by less than the margin.
 - **Neighborhoods differ a lot.** Of the 4,532 census tracts with reliable home value and owner income figures, 20% have a median home value at least 5 times the median owner income, and 8.1% at least 6 times.
 
-**Reading the numbers.** Every figure is a survey estimate with a margin of error; the dashboard shows the margin and a reliability rating for each one, and the statewide figures above are tight (margins under 1%). Each period pools five years of responses, so a figure describes a period, not a single year. Dollar figures are in 2024 dollars; the Census Bureau did not inflation-adjust home values before 2018-2022, so the 2010-2014 and 2015-2019 home values are converted with an average-year factor accurate to about 1 percentage point. Home value is the owner's own estimate of what the home would sell for, not a sale price, and it covers owner-occupied homes only, which is why the ratio divides by the income of owner households (with the income of all households it would be 3.4, 4.0 and 4.8). The ratio divides one median by another: it describes places, not what any one household can afford. The numbers show where and when costs differ, not why. [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) defines every term.
+**Reading the numbers.** Every figure is a survey estimate with a margin of error; the dashboard shows the margin and a reliability rating for each one, and the statewide figures above are tight (margins under 1%). Each period pools five years of responses, so a figure describes a period, not a single year. Dollar figures are in 2024 dollars; the Census Bureau did not inflation-adjust home values before 2018-2022, so the 2010-2014 and 2015-2019 home values are converted with an average-year factor, checked against a second method (within about 1% in value; see the Methodology). Home value is the owner's own estimate of what the home would sell for, not a sale price, and it covers owner-occupied homes only, which is why the ratio divides by the income of owner households (with the income of all households it would be 3.4, 4.0 and 4.8). The ratio divides one median by another: it describes places, not what any one household can afford. The numbers show where and when costs differ, not why. [`docs/METHODOLOGY.md`](docs/METHODOLOGY.md) defines every term.
 
 ## The dashboard
 
@@ -54,6 +54,8 @@ Get a free key from the [Census Bureau](https://api.census.gov/data/key_signup.h
 pip install -r requirements-pipeline.txt     # adds requests and GeoPandas
 python run_pipeline.py                       # fetch, clean, prepare boundaries
 python src/findings.py                       # the numbers quoted above
+python src/home_value_conversion_check.py    # checks the early home value conversion (add --fetch to re-pull its inputs)
+python src/crosscheck_profile.py             # checks three counties against the Census Data Profile tables
 ```
 
 ## Tests
@@ -76,7 +78,9 @@ The tests run offline with small hand-built data, no API key needed. They cover 
 │   ├── clean.py            # Cleaning, reliability, dollars, derived measures
 │   ├── geometry.py         # Simplified county and tract boundaries
 │   ├── view.py             # Which areas are shaded or gray, and the hover text
-│   └── findings.py         # The numbers quoted in this README
+│   ├── findings.py         # The numbers quoted in this README
+│   ├── home_value_conversion_check.py  # Checks the early home value conversion
+│   └── crosscheck_profile.py           # Cross-checks three counties against the Data Profile tables
 ├── data/
 │   ├── manifest.json       # What was pulled, when, with checksums
 │   └── processed/          # Cleaned tables, boundaries, cleaning log, findings

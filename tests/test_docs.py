@@ -63,6 +63,39 @@ def test_methodology_quotes_the_ratio_counts_and_the_all_households_sensitivity(
     assert f"{sens}" in doc and f"{own}" in doc
 
 
+def test_methodology_conversion_table_matches_the_committed_check():
+    import pandas as pd
+    doc = re.sub(r'\s+', ' ', read('docs', 'METHODOLOGY.md'))
+    check = pd.read_csv(cfg.CONVERSION_CHECK_PATH)
+    expected = []
+    for _, r in check.iterrows():
+        expected += [f"${r.published_median:,.0f}", f"${r.converted_average_year:,.0f}", f"({r.factor_average_year:.4f}",
+                     f"${r.converted_final_year_census:,.0f}", f"${r.converted_final_year_cpi:,.0f}",
+                     f"${r.converted_yearly_medians:,.0f}",
+                     f"{r.understatement_pct_census:.1f}% / {r.understatement_pct_cpi:.1f}%",
+                     f"+{r.growth_pct_average_year:.1f}%",
+                     f"+{r.growth_pct_final_year_census:.1f}% / +{r.growth_pct_final_year_cpi:.1f}%",
+                     f"{r.growth_overstatement_points_census:.1f} / {r.growth_overstatement_points_cpi:.1f}",
+                     f"{r.method_gap_pct:.1f}%", f"+{r.growth_pct_yearly_medians:.1f}% ({r.method_gap_growth_points:.1f})"]
+    under = check[['understatement_pct_census', 'understatement_pct_cpi']].to_numpy()
+    over = check[['growth_overstatement_points_census', 'growth_overstatement_points_cpi']].to_numpy()
+    expected += [f"understates them by {under.min():.1f}% to {under.max():.1f}%",
+                 f"overstates growth to 2020-2024 by {over.min():.1f} to {over.max():.1f} percentage points",
+                 f"by {abs(check.method_gap_pct[0]):.1f}% and {abs(check.method_gap_pct[1]):.1f}% in value",
+                 f"within {abs(check.cpi_vs_census_factor_pct[0]):.1f}% (2010-2014) and {abs(check.cpi_vs_census_factor_pct[1]):.1f}% (2015-2019)"]
+    missing = [e for e in expected if e not in doc]
+    assert not missing, f"Methodology differs from home_value_conversion_check.csv: {missing}"
+
+
+def test_methodology_names_the_check_scripts_and_the_cross_check_result():
+    import pandas as pd
+    doc = read('docs', 'METHODOLOGY.md')
+    result = pd.read_csv(cfg.PROFILE_CHECK_PATH)
+    assert f"all {len(result)} values match" in doc and result['match'].all()
+    for name in ('home_value_conversion_check.py', 'home_value_conversion_check.csv', 'crosscheck_profile.py', 'profile_crosscheck.csv'):
+        assert name in doc, name
+
+
 def test_the_census_notice_is_on_every_surface_that_needs_it():
     notice = 'This product uses the Census Bureau Data API but is not endorsed or certified by the Census Bureau.'
     assert view.CENSUS_NOTICE == notice

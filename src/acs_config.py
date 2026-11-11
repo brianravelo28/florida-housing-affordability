@@ -10,6 +10,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 RAW_DIR = os.path.join(ROOT, 'data', 'raw')              # API responses (rebuilt by the pipeline, not committed)
 PROCESSED_DIR = os.path.join(ROOT, 'data', 'processed')  # cleaned tables and simplified boundaries (committed)
 MANIFEST_PATH = os.path.join(ROOT, 'data', 'manifest.json')
+# Single-year Florida home value medians (2010-2019), the input to the second check of the early home-value conversion
+ONE_YEAR_MEDIANS_PATH = os.path.join(ROOT, 'data', 'home_value_1year_medians.csv')
+CONVERSION_CHECK_PATH = os.path.join(PROCESSED_DIR, 'home_value_conversion_check.csv')
+PROFILE_CHECK_PATH = os.path.join(PROCESSED_DIR, 'profile_crosscheck.csv')
 
 STATE_FIPS = '12'  # Florida
 API_BASE = 'https://api.census.gov/data/{year}/acs/acs5'
@@ -41,7 +45,7 @@ HOME_VALUE_UNADJUSTED_API_YEARS = (2014, 2019)
 # they are converted with the factor for the average year of the period: 2024 CPI-U / mean CPI-U of the period's
 # five years. CPI-U annual averages (U.S. city average, all items, 1982-84=100) from the Bureau of Labor
 # Statistics API, series CUUR0000SA0, retrieved 2026-11-04. They reproduce the factors Census publishes
-# (R-CPI-U-RS) within 0.3%.
+# (R-CPI-U-RS) within 0.4% (data/processed/home_value_conversion_check.csv).
 CPI_U_ANNUAL_AVERAGE = {
     2010: 218.056, 2011: 224.939, 2012: 229.594, 2013: 232.957, 2014: 236.736,
     2015: 237.017, 2016: 240.007, 2017: 245.120, 2018: 251.107, 2019: 255.657,

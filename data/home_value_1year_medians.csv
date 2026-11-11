@@ -1,0 +1,11 @@
+year,median_home_value,endpoint,retrieved_at_utc
+2010,164200,https://api.census.gov/data/2010/acs/acs1,2026-11-11T01:14:14Z
+2011,151000,https://api.census.gov/data/2011/acs/acs1,2026-11-11T01:14:14Z
+2012,148200,https://api.census.gov/data/2012/acs/acs1,2026-11-11T01:14:14Z
+2013,153300,https://api.census.gov/data/2013/acs/acs1,2026-11-11T01:14:14Z
+2014,162700,https://api.census.gov/data/2014/acs/acs1,2026-11-11T01:14:14Z
+2015,179800,https://api.census.gov/data/2015/acs/acs1,2026-11-11T01:14:14Z
+2016,197700,https://api.census.gov/data/2016/acs/acs1,2026-11-11T01:14:14Z
+2017,214000,https://api.census.gov/data/2017/acs/acs1,2026-11-11T01:14:14Z
+2018,230600,https://api.census.gov/data/2018/acs/acs1,2026-11-11T01:14:14Z
+2019,245100,https://api.census.gov/data/2019/acs/acs1,2026-11-11T01:14:14Z

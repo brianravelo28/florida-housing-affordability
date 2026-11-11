@@ -128,15 +128,36 @@ dollars before they are compared. Everything here is in **2024 dollars**.
 - **Income and rent** are converted with the factors the Census Bureau publishes for comparing periods (R-CPI-U-RS):
   1.08096469 from 2014 to 2019 dollars and 1.23070782 from 2019 to 2024 dollars, multiplied for the earliest period (1.330352).
 - **Home value** was not inflation-adjusted by the Census Bureau before its 2018-2022 release. The 2010-2014 and 2015-2019 home
-  values are therefore raw medians of values reported across the five survey years. Converting them with the final-year factor
-  would treat them as final-year dollars and understate them by about 3% to 4% (overstating home value growth by about 6 percentage
-  points). They are converted instead with the factor for the average year of the period: the 2024 Consumer Price Index (CPI-U)
-  divided by the mean CPI-U of the period's five years, 1.373080 for 2010-2014 and 1.276292 for 2015-2019. The 2020-2024 home values
-  are already adjusted and are used as published.
-- **How well this works.** The CPI-U annual averages (Bureau of Labor Statistics, series CUUR0000SA0) reproduce the Census Bureau's
-  published factors within 0.3%. A second method, converting the Census Bureau's single-year Florida home value medians for each
-  survey year separately and averaging, agrees with the average-year factor to within about 1 percentage point. The conversion is
-  therefore accurate to about 1 percentage point; this is the one input that does not come from the Census Bureau.
+  values are therefore raw medians of values reported across the five survey years, each in the dollars of the year it was reported.
+  They are converted with the factor for the average year of the period: the 2024 Consumer Price Index (CPI-U) divided by the mean
+  CPI-U of the period's five years, 1.373080 for 2010-2014 and 1.276292 for 2015-2019. The 2020-2024 home values are already
+  adjusted and are used as published.
+
+**Checking the home value conversion.** The conversion is the one input that does not come from the Census Bureau, so
+`src/home_value_conversion_check.py` writes `data/processed/home_value_conversion_check.csv` (Florida, 2024 dollars), the only
+source of the figures below:
+
+| | 2010-2014 | 2015-2019 |
+|---|-----------|-----------|
+| Published median (not inflation-adjusted) | $156,200 | $215,300 |
+| Converted with the average-year factor (used; factor in parentheses) | $214,475 (1.3731) | $274,786 (1.2763) |
+| Converted with the final-year factor, Census Bureau factor | $207,801 (1.3304) | $264,971 (1.2307) |
+| Converted with the final-year factor, CPI-U ratio | $206,974 (1.3251) | $264,171 (1.2270) |
+| Understatement by the final-year factor (Census Bureau factor / CPI-U) | 3.2% / 3.6% | 3.7% / 4.0% |
+| Growth to 2020-2024 ($359,000): average-year factor | +67.4% | +30.6% |
+| Growth to 2020-2024: final-year factor (Census Bureau factor / CPI-U) | +72.8% / +73.5% | +35.5% / +35.9% |
+| Overstatement of growth by the final-year factor, percentage points | 5.4 / 6.1 | 4.8 / 5.2 |
+| Second method: single-year medians, each converted with its own year's CPI-U, averaged | $214,257 | $271,805 |
+| Difference from the average-year conversion | -0.1% | -1.1% |
+| Growth by the second method (difference from the average-year growth, points) | +67.6% (0.2) | +32.1% (1.4) |
+
+Converting with the final-year factor would treat the values as final-year dollars: it understates them by 3.2% to 4.0% and
+overstates growth to 2020-2024 by 4.8 to 6.1 percentage points (the ranges cover the two factor bases). The second method uses the
+Census Bureau's single-year Florida medians for 2010-2019 (`data/home_value_1year_medians.csv`); it assumes a five-year median is
+close to the average of the yearly medians, which is approximate, and it is a state-level check only. It differs from the
+average-year conversion by 0.1% and 1.1% in value. The CPI-U annual averages (Bureau of Labor Statistics, series CUUR0000SA0) give
+final-year factors within 0.4% (2010-2014) and 0.3% (2015-2019) of the chained factors the Census Bureau publishes. The conversion
+is therefore good to about 1% in the converted value.
 
 The as-published values are kept in the data (the `*_as_published` columns) so every figure can be traced back to the Census Bureau.
 
@@ -170,7 +191,8 @@ no housing units and no estimates, and the pipeline fails if a tract with housin
 - Counties add up to the state, and tracts add up to their counties, for every count variable (pipeline fails otherwise).
 - No special value survives in any output file.
 - Three counties (Miami-Dade, Monroe, Alachua) were checked for home value, rent and income in two periods (2015-2019 and 2020-2024)
-  against the Census Bureau's separate Data Profile tables (DP04 and DP03): all 18 values match the as-published figures.
+  against the Census Bureau's separate Data Profile tables (DP04 and DP03): all 18 values match the as-published figures
+  (`data/processed/profile_crosscheck.csv`, written by `src/crosscheck_profile.py`).
 - Offline tests cover each rule: special values, open-ended values (top and bottom), reliability bands at their edges, dollar
   conversion, the margin-of-error formula, the add-up checks, which denominator the ratio uses, and which areas the map shades or grays.
 
