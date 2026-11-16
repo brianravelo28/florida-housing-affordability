@@ -39,6 +39,8 @@ U.S. Census Bureau American Community Survey 5-year estimates, pulled directly f
 
 ## Run it
 
+Python 3.12 or newer.
+
 ```bash
 pip install -r requirements.txt
 streamlit run app.py                # opens at http://localhost:8501
