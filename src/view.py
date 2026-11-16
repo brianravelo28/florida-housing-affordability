@@ -10,6 +10,7 @@ import json
 import math
 import os
 import platform
+import re
 from importlib import metadata
 
 import numpy as np
@@ -213,8 +214,29 @@ def _walk(coords):
             yield from _walk(c)
 
 
-def center_and_zoom(features, default=((27.9, -83.5), 5.6)):
-    """Map center (lat, lon) and zoom that fit the given GeoJSON features"""
+PHONE_PATTERN = re.compile(r'Mobi|Android|iPhone', re.I)
+
+
+def is_phone(user_agent):
+    """True for a phone browser (from its user-agent). Tablets and desktops get the desktop framing."""
+    return bool(user_agent and PHONE_PATTERN.search(user_agent))
+
+
+def map_settings(phone):
+    """
+    How the map is framed. A phone's map is about a third as wide as a desktop's, so the same zoom would cut off Florida's
+    western edge: phones start zoomed out, fit a county with a smaller factor, and put the color bar under the map.
+    """
+    if phone:
+        return {'height': 520, 'center': (27.8, -83.6), 'zoom': 4.7, 'fit': 150.0, 'margin_bottom': 70,
+                'colorbar': dict(orientation='h', x=0.5, xanchor='center', y=-0.02, yanchor='top', len=0.9, thickness=12,
+                                 title=dict(side='top'))}
+    return {'height': 640, 'center': (27.9, -83.6), 'zoom': 5.6, 'fit': 280.0, 'margin_bottom': 0,
+            'colorbar': dict(thickness=14, len=0.7)}
+
+
+def center_and_zoom(features, default=((27.9, -83.5), 5.6), fit=280.0):
+    """Map center (lat, lon) and zoom that fit the given GeoJSON features (`fit` is larger for wider maps)"""
     lons, lats = [], []
     for f in features:
         for lon, lat, *_ in _walk(f['geometry']['coordinates']):
@@ -223,7 +245,7 @@ def center_and_zoom(features, default=((27.9, -83.5), 5.6)):
     if not lons:
         return default
     span = max(max(lons) - min(lons), (max(lats) - min(lats)) * 1.2)
-    zoom = max(3.0, min(11.0, math.log2(280.0 / max(span, 1e-6))))
+    zoom = max(3.0, min(11.0, math.log2(fit / max(span, 1e-6))))
     return ((min(lats) + max(lats)) / 2, (min(lons) + max(lons)) / 2), zoom
 
 

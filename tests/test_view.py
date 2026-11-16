@@ -165,6 +165,30 @@ def test_center_and_zoom_fit_the_shapes():
     assert smaller > zoom  # a smaller area zooms in further
 
 
+@pytest.mark.parametrize('agent,expected', [
+    ('Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Mobile/15E148', True),
+    ('Mozilla/5.0 (Linux; Android 14; Pixel 8) AppleWebKit/537.36 Chrome/120 Mobile Safari/537.36', True),
+    ('Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Safari/604.1', False),
+    ('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36', False),
+    ('', False), (None, False)])
+def test_only_phones_get_the_phone_framing(agent, expected):
+    assert view.is_phone(agent) is expected
+
+
+def test_the_phone_map_is_zoomed_out_with_the_color_bar_below():
+    phone, desktop = view.map_settings(True), view.map_settings(False)
+    assert phone['zoom'] < desktop['zoom'] and phone['fit'] < desktop['fit'] and phone['height'] < desktop['height']
+    assert phone['colorbar']['orientation'] == 'h' and 'orientation' not in desktop['colorbar']
+    assert desktop['zoom'] == 5.6 and desktop['center'] == (27.9, -83.6)
+
+
+def test_a_county_fits_with_a_lower_zoom_on_a_phone():
+    county = [feature(-80.9, 25.1, -80.1, 25.9)]
+    _, desktop_zoom = view.center_and_zoom(county, fit=view.map_settings(False)['fit'])
+    _, phone_zoom = view.center_and_zoom(county, fit=view.map_settings(True)['fit'])
+    assert phone_zoom < desktop_zoom
+
+
 def test_center_and_zoom_default_when_there_are_no_shapes():
     assert view.center_and_zoom([]) == ((27.9, -83.5), 5.6)
 

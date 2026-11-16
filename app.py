@@ -68,8 +68,9 @@ county_names = dict(zip(counties.loc[counties['period'] == LATEST, 'geoid'],
 # ============================================================================
 
 @st.cache_data(show_spinner="Drawing the map...", max_entries=MAX_CACHED_MAPS)
-def build_map(geography, metric, period, county_geoid):
+def build_map(geography, metric, period, county_geoid, phone=False):
     spec = view.METRICS[metric]
+    settings = view.map_settings(phone)
     shapes = load_shapes('counties' if geography == 'Counties' else 'tracts')
     shape_ids = {f['properties']['geoid'] for f in shapes['features']}
 
@@ -93,7 +94,8 @@ def build_map(geography, metric, period, county_geoid):
             geojson=view.split_geojson(shapes, shaded['geoid']), locations=shaded['geoid'], z=shaded['value'],
             featureidkey='properties.geoid', text=shaded['hover'], hovertemplate='%{text}<extra></extra>',
             colorscale=spec['scale'], zmin=zmin, zmax=zmax, marker_opacity=0.85, marker_line_width=line,
-            marker_line_color='white', colorbar=dict(title=spec['unit'], thickness=14, len=0.7)))
+            marker_line_color='white', colorbar={**settings['colorbar'], 'title': dict(text=spec['unit'],
+                                                                                         **settings['colorbar'].get('title', {}))}))
     if len(gray):
         fig.add_trace(go.Choroplethmap(
             geojson=view.split_geojson(shapes, gray['geoid']), locations=gray['geoid'], z=[1] * len(gray),
@@ -103,11 +105,11 @@ def build_map(geography, metric, period, county_geoid):
 
     if county_geoid and geography == 'Tracts':
         chosen = [f for f in shapes['features'] if f['properties']['geoid'].startswith(county_geoid)]
-        (lat, lon), zoom = view.center_and_zoom(chosen)
+        (lat, lon), zoom = view.center_and_zoom(chosen, fit=settings['fit'])
     else:
-        (lat, lon), zoom = (27.9, -83.6), 5.6  # all of Florida
+        (lat, lon), zoom = settings['center'], settings['zoom']  # all of Florida
     fig.update_layout(map=dict(style='carto-positron', center=dict(lat=lat, lon=lon), zoom=zoom),
-                      margin=dict(l=0, r=0, t=0, b=0), height=640, showlegend=False)
+                      margin=dict(l=0, r=0, t=0, b=settings['margin_bottom']), height=settings['height'], showlegend=False)
     return fig, current
 
 
@@ -140,6 +142,10 @@ with st.sidebar:
         st.caption("Memory in use by this process: " + (f"about {info['memory_mb']:,.0f} MB" if info['memory_mb'] else "not reported here"))
 
 spec = view.METRICS[metric]
+try:
+    PHONE = view.is_phone(st.context.headers.get('User-Agent', ''))
+except Exception:  # no request headers outside a real session
+    PHONE = False
 
 st.markdown("# Florida Housing Affordability")
 st.markdown(f"How home values, rents and household incomes compare across Florida's {len(county_names)} counties "
@@ -181,7 +187,7 @@ def reliability_box():
 
 
 with tab_map:
-    fig, current = build_map(geography, metric, period, county_geoid)
+    fig, current = build_map(geography, metric, period, county_geoid, PHONE)
     st.markdown(f"### {metric}, {period}" + (f" ({choice})" if county_geoid else ""))
     st.plotly_chart(fig, width='stretch')
 
